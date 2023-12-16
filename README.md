@@ -25,4 +25,4 @@ As a beginner-friendly project, contributions from all skill levels are welcomed
 This project is a work in progress and serves as a hobby project for learning and experimentation.
 
 ## License
-This project is licensed under the [MIT License](link-to-license).
+This project is licensed under the [MIT License].
