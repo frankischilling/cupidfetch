@@ -11,7 +11,7 @@ Cupidfetch is a system information retrieval tool written in C, designed for Lin
 ## Usage
 1. **Compilation:** Compile the program using `gcc -o cupidfetch cupidfetch.c`.
 2. **Execution:** Run the compiled program using `./cupidfetch`.
-3. **Output:** Cupidfetch will display system information, including ASCII art representing the Linux distribution and Unicode icons for different details.
+3. **Output:** Cupidfetch will display system information, including ASCII art representing the Linux distribution (WIP) and Unicode icons (WIP) for different details.
 
 ## Requirements
 - Linux-based system
