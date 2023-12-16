@@ -22,7 +22,7 @@ Cupidfetch is a system information retrieval tool written in C, designed for Lin
 As a beginner-friendly project, contributions from all skill levels are welcomed and appreciated. If you're new to programming and looking to learn, this project is an excellent opportunity to get involved and contribute.
 
 ## Note
-This project is a work in progress and serves as a hobby project for learning and experimentation. Feel free to explore, experiment, and contribute at your own pace.
+This project is a work in progress and serves as a hobby project for learning and experimentation.
 
 ## License
 This project is licensed under the [MIT License](link-to-license).
