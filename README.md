@@ -5,7 +5,7 @@ Cupidfetch is a system information retrieval tool written in C, designed for Lin
 
 ## Features
 - Fetches and displays various system details such as hostname, distribution, kernel version, uptime, package count, shell, desktop environment, and username.
-- Uses ASCII art and Unicode icons to enhance the visual representation of information.
+- Uses ASCII art (soon) and Unicode icons (soon) to enhance the visual representation of information.
 - Built with simplicity in mind for beginners to understand and contribute.
 
 ## Usage
