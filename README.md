@@ -52,6 +52,7 @@ Welcome everyone! All skill levels can contribute:
 
 ## To-do list
 
+* **[ ]** Clean code and info display overall
 * **[ ]** Add ASCII art for each distro with custom kitty art
 * **[ ]** Add colors at the bottom
 * **[ ]** Fix alignment with text for proper ASCII art display
