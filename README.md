@@ -21,6 +21,11 @@ Cupidfetch is a system information retrieval tool written in C, designed for Lin
 ## How to Contribute
 As a beginner-friendly project, contributions from all skill levels are welcomed and appreciated. If you're new to programming and looking to learn, this project is an excellent opportunity to get involved and contribute.
 
+## To-do list
+- I want to add ASCII art for each distro with custom kitty art too
+- Add colors at the bottom
+- Fix alignment with text so ascii art looks correct
+
 ## Note
 This project is a work in progress and serves as a hobby project for learning and experimentation.
 
