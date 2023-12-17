@@ -237,15 +237,35 @@ void display_local_ip() {
     freeifaddrs(ifaddr);
 }
 
+void print_right(const char *key, const char *value) {
+    int key_length = strlen(key);
+    int padding = 30 - key_length; // Adjust the padding as needed for alignment
+    printf("%s%*s: %s\n", key, padding, "", value);
+}
+
 int main() {
     const char* detected_distro = detect_linux_distro();
+
+    char host_name[256];
+    char* username = getlogin();
+    if (gethostname(host_name, sizeof(host_name)) != 0) {
+        fprintf(stderr, "Error getting host name\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Calculate the spaces required for alignment
+    int art_width = 18; // Width of the ASCII art
+    int total_width = 50; // Total width of the line
+    int text_width = strlen(username) + strlen(host_name) + 1; // Length of username@host
+    int spaces = total_width - art_width - text_width;
+
+    printf("\n%*s%s@%s\n", spaces, "", username, host_name);
 
     // Display the cat ASCII art based on the detected distribution
     print_cat(detected_distro);
 
     // Display the rest of the system information
     printf("\n");
-    printf("cupidfetch\n");
     printf("-----------------------------------------\n");
 
     // Call functions to display required information based on the distribution
