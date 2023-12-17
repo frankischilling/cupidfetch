@@ -61,7 +61,3 @@ Welcome everyone! All skill levels can contribute:
 ## Note
 
 This project is a work-in-progress for learning and experimentation.
-
-## License
-
-MIT License
