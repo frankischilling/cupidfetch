@@ -6,10 +6,10 @@
 Cupidfetch is a system information retrieval tool written in C, designed for Linux systems. It's a beginner-friendly, work-in-progress hobby project aimed at learning and exploring programming concepts.
 
 ## Features
-- [x] Fetches and displays various system details such as hostname, distribution, kernel version, uptime, package count, shell, desktop environment, and username.
-- [ ] Uses ASCII art to enhance the visual representation of information. (soon)
-- [ ] Uses Unicode icons to provide additional visual cues. (soon)
-- [x] Built with simplicity in mind for beginners to understand and contribute.
+[x] Fetches and displays various system details such as hostname, distribution, kernel version, uptime, package count, shell, desktop environment, and username.
+[ ] Uses ASCII art to enhance the visual representation of information. (soon)
+[ ] Uses Unicode icons to provide additional visual cues. (soon)
+[x] Built with simplicity in mind for beginners to understand and contribute.
 
 ## Usage
 1. **Compilation:** Compile the program using `gcc -o cupidfetch cupidfetch.c`.
