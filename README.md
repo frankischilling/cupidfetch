@@ -55,6 +55,7 @@ Welcome everyone! All skill levels can contribute:
 * **[ ]** Add ASCII art for each distro with custom kitty art
 * **[ ]** Add colors at the bottom
 * **[ ]** Fix alignment with text for proper ASCII art display
+* **[ ]** Add unicode icons for each info area (ex. terminal icon for what shell you are using)
 
 ## Note
 
