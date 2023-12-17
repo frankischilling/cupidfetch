@@ -2,6 +2,7 @@
 
 ## Overview
 ![cupid](images/cupid.png)
+
 Cupidfetch is a system information retrieval tool written in C, designed for Linux systems. It's a beginner-friendly, work-in-progress hobby project aimed at learning and exploring programming concepts.
 
 ## Features
