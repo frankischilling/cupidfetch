@@ -6,6 +6,13 @@
 #include <unistd.h>
 #include <ifaddrs.h>
 #include <arpa/inet.h>
+#include <sys/ioctl.h>
+
+int get_terminal_width() {
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    return w.ws_col;
+}
 
 void print_info(const char *key, const char *value) {
     int key_length = strlen(key);
@@ -22,11 +29,11 @@ void print_cat(const char* distro) {
         strcmp(distro, "Arch") == 0 || strcmp(distro, "CentOS") == 0) {
         printf(" /\\_/\\\n");
         printf("( o.o )\n");
-        printf(" > ^ <  cupidfetch\n");
+        printf(" > ^ <  cupidfetch");
     } else {
         printf(" /\\_/\\\n");
         printf("( x.x )\n");
-        printf(" > ^ <  cupidfetch\n");
+        printf(" > ^ <  cupidfetch");
     }
 }
 
@@ -62,18 +69,6 @@ const char* detect_linux_distro() {
     return distro;
 }
 
-void get_system_info() {
-    struct utsname uname_data;
-    if (uname(&uname_data) != 0) {
-        fprintf(stderr, "Error getting system information\n");
-        exit(EXIT_FAILURE);
-    }
-
-    print_info("System", uname_data.sysname);
-    print_info("Release", uname_data.release);
-    print_info("Version", uname_data.version);
-    print_info("Machine", uname_data.machine);
-}
 
 void get_host_name() {
     char host_name[256];
@@ -192,12 +187,6 @@ void get_uptime() {
     printf("Uptime         : %d days, %02d:%02d\n", days, hours, minutes);
 }
 
-void print_ip(const char *key, const char *value) {
-    int key_length = strlen(key);
-    int padding = 30 - key_length; // Adjust the padding as needed for alignment
-    printf("%s%*s: %s\n", key, padding, "", value);
-}
-
 void display_local_ip() {
     struct ifaddrs *ifaddr, *ifa;
     if (getifaddrs(&ifaddr) == -1) {
@@ -227,16 +216,6 @@ void display_local_ip() {
     }
 
     freeifaddrs(ifaddr);
-}
-
-void print_right(const char *key, const char *value) {
-    int key_length = strlen(key);
-    int padding = 30 - key_length; // Adjust the padding as needed for alignment
-    printf("%s%*s: %s\n", key, padding, "", value);
-}
-
-void display_os_info() {
-    get_system_info();
 }
 
 void display_host_name() {
