@@ -60,7 +60,7 @@ Welcome everyone! All skill levels can contribute:
 * **[ ]** Create and use a function that will get the geometry for each terminal so we arent hard coding values
 * **[ ]** Implement a soild function to detect a large amount of distros
 
-![Intended UI](images/UI.png)
+![Intended UI](images/ui.png)
 
 ## Note
 
