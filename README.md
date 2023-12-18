@@ -65,3 +65,7 @@ Welcome everyone! All skill levels can contribute:
 ## Note
 
 This project is a work-in-progress for learning and experimentation.
+
+## License
+
+[GNU General Public License 2.0 or later](https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html)
