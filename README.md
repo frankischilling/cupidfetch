@@ -30,10 +30,10 @@ Cupidfetch is a system information retrieval tool written in C for Linux systems
 * Easy to understand and contribute
 
 ## Usage
-
-1. **Compilation:** `gcc -o cupidfetch cupidfetch.c`
-2. **Execution:** `./cupidfetch`
-3. **Output:** System information with:
+1. **Clone** `git clone github.com/frankischilling/cupidfetch`
+2. **Compilation:** `gcc -o cupidfetch cupidfetch.c`
+3. **Execution:** `./cupidfetch`
+4. **Output:** System information with:
     * **(WIP)** ASCII art representing the Linux distribution
     * **(WIP)** Unicode icons for different details
 
