@@ -1,3 +1,4 @@
+// Cupidfetch is a system information retrieval tool written in C for Linux systems. It's a beginner-friendly, work-in-progress hobby project aimed at learning and exploring programming concepts.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,7 +8,13 @@
 #include <arpa/inet.h>
 
 void print_info(const char *key, const char *value) {
-    printf("%-15s: %s\n", key, value);
+    int key_length = strlen(key);
+    int padding = 30 - key_length; // Adjust the padding as needed for alignment
+    if (strcmp(key, "Local IP") == 0) {
+        printf("%s%*s: %s\n", key, padding - 2, "", value); // Adjusted padding for "Local IP"
+    } else {
+        printf("%-15s: %s\n", key, value);
+    }
 }
 
 void print_cat(const char* distro) {
@@ -185,10 +192,47 @@ void get_uptime() {
     printf("Uptime         : %d days, %02d:%02d\n", days, hours, minutes);
 }
 
-void display_header(const char* distro) {
-    printf("cupidfetch\n");
-    printf("-----------------------------------------\n");
-    print_cat(distro); // Display cat ASCII art based on the distro
+void print_ip(const char *key, const char *value) {
+    int key_length = strlen(key);
+    int padding = 30 - key_length; // Adjust the padding as needed for alignment
+    printf("%s%*s: %s\n", key, padding, "", value);
+}
+
+void display_local_ip() {
+    struct ifaddrs *ifaddr, *ifa;
+    if (getifaddrs(&ifaddr) == -1) {
+        printf("Error retrieving IP address.\n");
+        return;
+    }
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr != NULL && ifa->ifa_addr->sa_family == AF_INET) {
+            struct sockaddr_in *addr = (struct sockaddr_in *)ifa->ifa_addr;
+            char ip_addr[16]; // Allocate enough space for an IPv6 address
+            snprintf(ip_addr, sizeof(ip_addr), "%s", inet_ntoa(addr->sin_addr));
+
+            // Check if loopback interface and skip if needed
+            if (strcmp(ifa->ifa_name, "lo") == 0) {
+                continue;
+            }
+
+            // Calculate exact padding based on string lengths
+            int key_length = strlen("Local IP");
+            int value_length = strlen(ip_addr);
+            int padding = 28 - (key_length + value_length); // Adjust as needed
+
+            // Print with dynamic padding for right alignment
+            printf("%s%*s: %s\n", "Local IP", padding, "", ip_addr);
+            break;
+        }
+    }
+
+    freeifaddrs(ifaddr);
+}
+
+void print_right(const char *key, const char *value) {
+    int key_length = strlen(key);
+    int padding = 30 - key_length; // Adjust the padding as needed for alignment
+    printf("%s%*s: %s\n", key, padding, "", value);
 }
 
 void display_os_info() {
@@ -219,33 +263,8 @@ void display_uptime() {
     get_uptime();
 }
 
-void display_local_ip() {
-    struct ifaddrs *ifaddr, *ifa;
-    if (getifaddrs(&ifaddr) == -1) {
-        printf("Error retrieving IP address.\n");
-        return;
-    }
-
-    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
-        if (ifa->ifa_addr != NULL && ifa->ifa_addr->sa_family == AF_INET) {
-            struct sockaddr_in *addr = (struct sockaddr_in *)ifa->ifa_addr;
-            printf("Local IP: %s\n", inet_ntoa(addr->sin_addr));
-            break;
-        }
-    }
-
-    freeifaddrs(ifaddr);
-}
-
-void print_right(const char *key, const char *value) {
-    int key_length = strlen(key);
-    int padding = 30 - key_length; // Adjust the padding as needed for alignment
-    printf("%s%*s: %s\n", key, padding, "", value);
-}
-
 int main() {
     const char* detected_distro = detect_linux_distro();
-
     char host_name[256];
     char* username = getlogin();
     if (gethostname(host_name, sizeof(host_name)) != 0) {
@@ -277,6 +296,7 @@ int main() {
     display_package_count(detected_distro);
     display_shell();
     display_desktop_environment();
+    display_local_ip();
 
     return 0;
 }
