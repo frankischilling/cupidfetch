@@ -57,7 +57,8 @@ Welcome everyone! All skill levels can contribute:
 * **[ ]** Add colors at the bottom
 * **[ ]** Fix alignment with text for proper ASCII art display
 * **[ ]** Add unicode icons for each info area (ex. terminal icon for what shell you are using)
-* **[ ]** create and use a function that will get the geometry for each terminal so we arent hard coding values
+* **[ ]** Create and use a function that will get the geometry for each terminal so we arent hard coding values
+* **[ ]** Implement a soild function to detect a large amount of distros
 
 ## Note
 
