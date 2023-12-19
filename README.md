@@ -59,7 +59,7 @@ Welcome everyone! All skill levels can contribute:
 * **[ ]** Add unicode icons for each info area (ex. terminal icon for what shell you are using)
 * **[ ]** Create and use a function that will get the geometry for each terminal so we arent hard coding values
 * **[ ]** Implement a soild function to detect a large amount of distros
-* **[ ]** Config system using TOML
+* **[X]** Config system using INI files with inih C parser (done, pushing soon)
 
 ![Intended UI](images/ui.png)
 
