@@ -68,13 +68,6 @@ sudo apt install git
 
 The inih C parser can be integrated into your project either by manually downloading the source files from the [inih GitHub repository](https://github.com/benhoyt/inih) or by using a package manager if available.
 
-### Manual Integration
-
-1. Download the inih source code from GitHub.
-2. Copy the `ini.h` and `ini.c` files into your project's source directory or a designated `libs` directory.
-3. Add the files to your project's `CMakeLists.txt` or build system.
-4. Build the inih project to generate the `libinih.so` library and move it into the `libs` directory.
-
 ## Usage
 1. **Clone** `git clone https://github.com/frankischilling/cupidfetch`
 2. **Compilation:** `gcc -o cupidfetch main.c libs/ini.c`
