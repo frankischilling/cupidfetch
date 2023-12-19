@@ -306,8 +306,8 @@ int main() {
             .display_local_ip = 1,
     };
 
-    if (access("../cupidfetch.ini", F_OK) != -1) {
-        int parse_result = ini_parse("../cupidfetch.ini", iniHandler, &userConfig);
+    if (access("../cupidfetch/cupidfetch.ini", F_OK) != -1) {
+        int parse_result = ini_parse("../cupidfetch/cupidfetch.ini", iniHandler, &userConfig);
         if (parse_result < 0) {
             fprintf(stderr, "Error parsing INI file: %s\n", strerror(parse_result));
             exit(EXIT_FAILURE);
