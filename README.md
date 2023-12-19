@@ -82,7 +82,7 @@ target_link_libraries(cupidfetch PRIVATE m)  # You may need to link against the 
 
 ## Usage
 1. **Clone** `git clone https://github.com/frankischilling/cupidfetch`
-2. **Compilation:** `gcc -o cupidfetch cupidfetch.c`
+2. **Compilation:** `gcc -o cupidfetch main.c`
 3. **Execution:** `./cupidfetch`
 4. **Output:** System information with:
     * **(WIP)** ASCII art representing the Linux distribution
