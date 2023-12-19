@@ -63,26 +63,9 @@ The inih C parser can be integrated into your project either by manually downloa
 3. Add the files to your project's `CMakeLists.txt` or build system.
 4. Build the inih project to generate the `libinih.so` library and move it into the `libs` directory.
 
-For users who want to see a makefile example, the following is provided:
-
-```
-cmake_minimum_required(VERSION 3.27)
-project(cupidfetch C)
-
-set(CMAKE_C_STANDARD 11)
-
-add_executable(cupidfetch main.c)
-
-# Assuming ini.c and ini.h are in the same directory as your main.c
-target_sources(cupidfetch PRIVATE libs/ini.c)
-
-# Link against the ini library
-target_link_libraries(cupidfetch PRIVATE m)  # You may need to link against the math library
-```
-
 ## Usage
 1. **Clone** `git clone https://github.com/frankischilling/cupidfetch`
-2. **Compilation:** `gcc -o cupidfetch main.c`
+2. **Compilation:** `gcc -o cupidfetch main.c libs/ini.c`
 3. **Execution:** `./cupidfetch`
 4. **Output:** System information with:
     * **(WIP)** ASCII art representing the Linux distribution
