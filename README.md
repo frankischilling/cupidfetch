@@ -1,10 +1,10 @@
-# Cupidfetch
+# cupidfetch
 
 ## Overview
 
 ![cupid](images/cupid.png)
 
-Cupidfetch is a system information retrieval tool written in C for Linux systems. It's a beginner-friendly, work-in-progress hobby project aimed at learning and exploring programming concepts.
+cupidfetch is a system information retrieval tool written in C for Linux systems. It's a beginner-friendly, work-in-progress hobby project aimed at learning and exploring programming concepts.
 
 ## Features
 
@@ -31,17 +31,17 @@ Cupidfetch is a system information retrieval tool written in C for Linux systems
 
 ## Dependencies
 
-Cupidfetch relies on the following components and tools:
+cupidfetch relies on the following components and tools:
 
-1. **C Compiler:** Cupidfetch is written in the C programming language, and compilation requires a C compiler. The recommended compiler is GCC (GNU Compiler Collection).
+1. **C Compiler:** cupidfetch is written in the C programming language, and compilation requires a C compiler. The recommended compiler is GCC (GNU Compiler Collection).
 
    - [GCC (GNU Compiler Collection)](https://gcc.gnu.org/): The GNU Compiler Collection is a set of compilers for various programming languages, including C.
 
-2. **inih C Parser:** Cupidfetch uses the [inih C parser](https://github.com/benhoyt/inih) to handle configuration files in INI format.
+2. **inih C Parser:** cupidfetch uses the [inih C parser](https://github.com/benhoyt/inih) to handle configuration files in INI format.
 
    - [inih C parser](https://github.com/benhoyt/inih): A simple C library for reading and writing INI files.
      
-3. **Git:** Cupidfetch uses Git to clone the repository for easy deployment.
+3. **Git:** cupidfetch uses Git to clone the repository for easy deployment.
    
    - If you don't have Git installed, you can download and install it from the [Git website](https://git-scm.com).
 
