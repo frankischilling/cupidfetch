@@ -52,16 +52,33 @@ sudo apt-get update
 sudo apt-get install build-essential
 ```
 
-##inih C Parser
-The inih C parser can be integrated into your project. You can either manually download the source files from the [inih GitHub repository](https://github.com/benhoyt/inih) or use a package manager if available.
+## inih C Parser
 
-#Manual Integration
-Download the inih source code from GitHub.
-Copy the ini.h and ini.c files into your project's source directory or a designated libs directory.
-Add the files to your project's CMakeLists.txt or build system.
-Make sure to build the inih project so you can also move the libinih.so into the libs directory.
+The inih C parser can be integrated into your project either by manually downloading the source files from the [inih GitHub repository](https://github.com/benhoyt/inih) or by using a package manager if available.
 
-I will also proviide my makefile for users who want to see.
+### Manual Integration
+
+1. Download the inih source code from GitHub.
+2. Copy the `ini.h` and `ini.c` files into your project's source directory or a designated `libs` directory.
+3. Add the files to your project's `CMakeLists.txt` or build system.
+4. Build the inih project to generate the `libinih.so` library and move it into the `libs` directory.
+
+For users who want to see a makefile example, the following is provided:
+
+```
+cmake_minimum_required(VERSION 3.27)
+project(cupidfetch C)
+
+set(CMAKE_C_STANDARD 11)
+
+add_executable(cupidfetch main.c)
+
+# Assuming ini.c and ini.h are in the same directory as your main.c
+target_sources(cupidfetch PRIVATE libs/ini.c)
+
+# Link against the ini library
+target_link_libraries(cupidfetch PRIVATE m)  # You may need to link against the math library
+```
 
 ## Usage
 1. **Clone** `git clone https://github.com/frankischilling/cupidfetch`
