@@ -40,6 +40,10 @@ Cupidfetch relies on the following components and tools:
 2. **inih C Parser:** Cupidfetch uses the [inih C parser](https://github.com/benhoyt/inih) to handle configuration files in INI format.
 
    - [inih C parser](https://github.com/benhoyt/inih): A simple C library for reading and writing INI files.
+     
+3. **Git:** Cupidfetch uses Git to clone the repository for easy deployment.
+   
+   - If you don't have Git installed, you can download and install it from the [Git website](https://git-scm.com).
 
 ## How to Install Dependencies
 
@@ -48,8 +52,16 @@ Cupidfetch relies on the following components and tools:
 GCC is often available through the package manager of your Linux distribution. For example, on Debian/Ubuntu-based systems, you can install it using:
 
 ```
-sudo apt-get update
-sudo apt-get install build-essential
+sudo apt update
+sudo apt install build-essential
+```
+
+### Git
+
+Git can be installed through the package manager of your Linux distribution. For example, on Debian/Ubuntu-based systems, you can install it using:
+
+```
+sudo apt install git 
 ```
 
 ## inih C Parser
