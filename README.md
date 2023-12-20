@@ -16,6 +16,7 @@ cupidfetch is a system information retrieval tool written in C for Linux systems
 * Uptime
 * Package count
 * Shell
+* Terminal
 * Desktop environment
 * Username
 
