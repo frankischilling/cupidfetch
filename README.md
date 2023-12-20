@@ -89,6 +89,7 @@ Welcome everyone! All skill levels can contribute:
 
 * Beginners: Great project to learn and get involved
 * Experienced developers: Share your knowledge and help improve
+* Join our Discord!: [Discord](https://discord.gg/698GBkg2KR)
 
 ## To-do list
 
