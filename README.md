@@ -105,7 +105,7 @@ Welcome everyone! All skill levels can contribute:
 
 ![Intended UI](images/ui.png)
 
-## Note
+## Notes
 
 This project is a work-in-progress for learning and experimentation.
 
