@@ -7,6 +7,8 @@
 #include <ifaddrs.h>
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
+#include <pwd.h>
+#include <sys/stat.h>
 #include "libs/ini.h"
 
 int get_terminal_width() {
@@ -243,6 +245,17 @@ void display_uptime() {
     get_uptime();
 }
 
+const char* get_home_directory() {
+    const char* homeDir;
+    if ((homeDir = getenv("HOME")) == NULL) {
+        struct passwd* pw = getpwuid(getuid());
+        if (pw != NULL) {
+            homeDir = pw->pw_dir;
+        }
+    }
+    return homeDir;
+}
+
 struct CupidConfig {
     int display_host_name;
     int display_username;
@@ -254,6 +267,48 @@ struct CupidConfig {
     int display_desktop_environment;
     int display_local_ip;
 };
+
+void create_default_config(const char* config_path, const struct CupidConfig* default_config) {
+    FILE* config_file = fopen(config_path, "w");
+    if (config_file == NULL) {
+        fprintf(stderr, "Error creating config file: %s\n", config_path);
+        exit(EXIT_FAILURE);
+    }
+
+    fprintf(config_file, "[DisplayOptions]\n");
+    fprintf(config_file, "host_name = %d\n", default_config->display_host_name);
+    fprintf(config_file, "username = %d\n", default_config->display_username);
+    fprintf(config_file, "distro = %d\n", default_config->display_distro);
+    fprintf(config_file, "linux_kernel = %d\n", default_config->display_linux_kernel);
+    fprintf(config_file, "uptime = %d\n", default_config->display_uptime);
+    fprintf(config_file, "package_count = %d\n", default_config->display_package_count);
+    fprintf(config_file, "shell = %d\n", default_config->display_shell);
+    fprintf(config_file, "desktop_environment = %d\n", default_config->display_desktop_environment);
+    fprintf(config_file, "local_ip = %d\n", default_config->display_local_ip);
+
+    fclose(config_file);
+}
+
+void write_config_to_file(const char* config_path, const struct CupidConfig* user_config) {
+    FILE* config_file = fopen(config_path, "w");
+    if (config_file == NULL) {
+        fprintf(stderr, "Error writing to config file: %s\n", config_path);
+        exit(EXIT_FAILURE);
+    }
+
+    fprintf(config_file, "[DisplayOptions]\n");
+    fprintf(config_file, "host_name = %d\n", user_config->display_host_name);
+    fprintf(config_file, "username = %d\n", user_config->display_username);
+    fprintf(config_file, "distro = %d\n", user_config->display_distro);
+    fprintf(config_file, "linux_kernel = %d\n", user_config->display_linux_kernel);
+    fprintf(config_file, "uptime = %d\n", user_config->display_uptime);
+    fprintf(config_file, "package_count = %d\n", user_config->display_package_count);
+    fprintf(config_file, "shell = %d\n", user_config->display_shell);
+    fprintf(config_file, "desktop_environment = %d\n", user_config->display_desktop_environment);
+    fprintf(config_file, "local_ip = %d\n", user_config->display_local_ip);
+
+    fclose(config_file);
+}
 
 // INI handler function
 int iniHandler(void* user, const char* section, const char* name, const char* value) {
@@ -286,14 +341,7 @@ int iniHandler(void* user, const char* section, const char* name, const char* va
 }
 
 int main() {
-    const char* detected_distro = detect_linux_distro();
-    char host_name[256];
-    char* username = getlogin();
-    if (gethostname(host_name, sizeof(host_name)) != 0) {
-        fprintf(stderr, "Error getting host name\n");
-        exit(EXIT_FAILURE);
-    }
-
+    // Declare and initialize the configuration
     struct CupidConfig userConfig = {
             .display_host_name = 1,
             .display_username = 1,
@@ -306,33 +354,67 @@ int main() {
             .display_local_ip = 1,
     };
 
-    if (access("../cupidfetch/cupidfetch.ini", F_OK) != -1) {
-        int parse_result = ini_parse("../cupidfetch/cupidfetch.ini", iniHandler, &userConfig);
+    // Determine the home directory of the current user
+    const char* homeDir = get_home_directory();
+
+    // Construct the path for the config file
+    char configPath[256];
+    snprintf(configPath, sizeof(configPath), "%s/.config/cupidfetch/cupidfetch.ini", homeDir);
+
+    // Check if the config directory exists, if not, create it
+    const char* configDir = ".config/cupidfetch";
+    char configDirPath[256];
+    snprintf(configDirPath, sizeof(configDirPath), "%s/%s", homeDir, configDir);
+
+    if (access(configDirPath, F_OK) == -1) {
+        // Directory does not exist, create it
+        if (mkdir(configDirPath, 0700) != 0) {
+            fprintf(stderr, "Error creating config directory: %s\n", configDirPath);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    // Fetch system information
+    const char* detectedDistro = detect_linux_distro();
+    char hostName[256];
+    char* username = getlogin();
+
+    // Check for errors getting host name
+    if (gethostname(hostName, sizeof(hostName)) != 0) {
+        fprintf(stderr, "Error getting host name\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Calculate alignment spaces
+    int artWidth = 18;
+    int totalWidth = 50;
+    int textWidth = strlen(username) + strlen(hostName) + 1;
+    int spaces = totalWidth - artWidth - textWidth;
+
+    // Display username@hostname
+    printf("\n%*s%s@%s\n", spaces, "", username, hostName);
+
+    // Display cat ASCII art based on the detected distribution
+    print_cat(detectedDistro);
+
+    // Display system information based on user configuration
+    printf("\n");
+    printf("-----------------------------------------\n");
+
+    // Check if the config file exists
+    if (access(configPath, F_OK) != -1) {
+        // Config file exists, load configuration from the file
+        int parse_result = ini_parse(configPath, iniHandler, &userConfig);
         if (parse_result < 0) {
             fprintf(stderr, "Error parsing INI file: %s\n", strerror(parse_result));
             exit(EXIT_FAILURE);
         }
     } else {
-        fprintf(stderr, "Error: cupidfetch.ini not found or inaccessible\n");
-        exit(EXIT_FAILURE);
+        // Config file doesn't exist, create the default configuration file
+        create_default_config(configPath, &userConfig);
     }
 
-    // Calculate the spaces required for alignment
-    int art_width = 18; // Width of the ASCII art
-    int total_width = 50; // Total width of the line
-    int text_width = strlen(username) + strlen(host_name) + 1; // Length of username@host
-    int spaces = total_width - art_width - text_width;
-
-    printf("\n%*s%s@%s\n", spaces, "", username, host_name);
-
-    // Display the cat ASCII art based on the detected distribution
-    print_cat(detected_distro);
-
-    // Display the rest of the system information
-    printf("\n");
-    printf("-----------------------------------------\n");
-
-    // Call functions to display required information based on the distribution
+    // Display system information based on loaded or default user configuration
     if (userConfig.display_host_name) {
         display_host_name();
     }
@@ -340,7 +422,7 @@ int main() {
         get_username();
     }
     if (userConfig.display_distro) {
-        print_info("Distro", detected_distro);
+        print_info("Distro", detectedDistro);
     }
     if (userConfig.display_linux_kernel) {
         display_linux_kernel();
@@ -349,16 +431,17 @@ int main() {
         display_uptime();
     }
     if (userConfig.display_package_count) {
-        display_package_count(detected_distro);
+        display_package_count(detectedDistro);
     }
     if (userConfig.display_shell) {
         display_shell();
     }
     if (userConfig.display_desktop_environment) {
-        get_desktop_environment();  // Display desktop environment only if configured to do so
+        get_desktop_environment();
     }
     if (userConfig.display_local_ip) {
         display_local_ip();
     }
+
     return 0;
 }
