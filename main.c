@@ -9,6 +9,7 @@
 #include <sys/ioctl.h>
 #include <pwd.h>
 #include <sys/stat.h>
+#include <ctype.h>
 #include "libs/ini.h"
 
 int get_terminal_width() {
@@ -52,26 +53,97 @@ const char* detect_linux_distro() {
 
     while (fgets(line, sizeof(line), os_release)) {
         if (strstr(line, "ID=") != NULL) {
-            if (strstr(line, "ubuntu") != NULL) {
-                distro = "Ubuntu";
-                break;
-            } else if (strstr(line, "debian") != NULL) {
-                distro = "Debian";
-                break;
-            } else if (strstr(line, "arch") != NULL) {
-                distro = "Arch";
-                break;
-            } else if (strstr(line, "centos") != NULL) {
-                distro = "CentOS";
-                break;
+            char* distroId = strchr(line, '=') + 1;
+            distroId[strcspn(distroId, "\n")] = '\0';
+
+            // Convert to lowercase for case-insensitive comparison
+            for (int i = 0; distroId[i]; i++) {
+                distroId[i] = tolower(distroId[i]);
             }
+
+            // List of supported distros
+            const char* supported_distros[] = {
+                    "arch", "debian", "ubuntu", "centos", "fedora", "redhat", "opensuse",
+                    "gentoo", "alpine", "slackware", "manjaro", "elementary", "mint", "kali",
+                    "zorin", "void", "alma", "artix", "endeavouros", "mx", "peppermint",
+                    "pop", "solus", "antergos", "mageia", "void", "slackware"
+            };
+
+            int supported = 0;
+
+            // Check if the distroId is in the list of supported distros
+            for (int i = 0; i < sizeof(supported_distros) / sizeof(supported_distros[0]); i++) {
+                if (strstr(distroId, supported_distros[i]) != NULL) {
+                    supported = 1;
+                    break;
+                }
+            }
+
+            if (!supported) {
+                printf("Warning: Unknown distribution '%s'\n", distroId);
+                break; // Continue without updating distro
+            }
+
+            // Set the distro based on the detected ID
+            if (strstr(distroId, "arch") != NULL) {
+                distro = "Arch Linux";
+            } else if (strstr(distroId, "debian") != NULL) {
+                distro = "Debian";
+            } else if (strstr(distroId, "ubuntu") != NULL) {
+                distro = "Ubuntu";
+            } else if (strstr(distroId, "centos") != NULL) {
+                distro = "CentOS";
+            } else if (strstr(distroId, "fedora") != NULL) {
+                distro = "Fedora";
+            } else if (strstr(distroId, "redhat") != NULL) {
+                distro = "Red Hat";
+            } else if (strstr(distroId, "opensuse") != NULL) {
+                distro = "openSUSE";
+            } else if (strstr(distroId, "gentoo") != NULL) {
+                distro = "Gentoo";
+            } else if (strstr(distroId, "alpine") != NULL) {
+                distro = "Alpine Linux";
+            } else if (strstr(distroId, "slackware") != NULL) {
+                distro = "Slackware";
+            } else if (strstr(distroId, "manjaro") != NULL) {
+                distro = "Manjaro";
+            } else if (strstr(distroId, "elementary") != NULL) {
+                distro = "elementary OS";
+            } else if (strstr(distroId, "mint") != NULL) {
+                distro = "Linux Mint";
+            } else if (strstr(distroId, "kali") != NULL) {
+                distro = "Kali Linux";
+            } else if (strstr(distroId, "zorin") != NULL) {
+                distro = "Zorin OS";
+            } else if (strstr(distroId, "void") != NULL) {
+                distro = "Void Linux";
+            } else if (strstr(distroId, "alma") != NULL) {
+                distro = "AlmaLinux";
+            } else if (strstr(distroId, "artix") != NULL) {
+                distro = "Artix Linux";
+            } else if (strstr(distroId, "endeavouros") != NULL) {
+                distro = "EndeavourOS";
+            } else if (strstr(distroId, "mx") != NULL) {
+                distro = "MX Linux";
+            } else if (strstr(distroId, "peppermint") != NULL) {
+                distro = "Peppermint OS";
+            } else if (strstr(distroId, "pop") != NULL) {
+                distro = "Pop!_OS";
+            } else if (strstr(distroId, "solus") != NULL) {
+                distro = "Solus";
+            } else if (strstr(distroId, "antergos") != NULL) {
+                distro = "Antergos";
+            } else if (strstr(distroId, "mageia") != NULL) {
+                distro = "Mageia";
+            }
+
+            break;
         }
     }
 
     fclose(os_release);
     return distro;
 }
-
 
 void get_host_name() {
     char host_name[256];
@@ -132,16 +204,60 @@ void get_username() {
 void get_package_count(const char* distro) {
     const char* package_command;
 
-    if (strcmp(distro, "Ubuntu") == 0 || strcmp(distro, "Debian") == 0) {
-        package_command = "dpkg -l | tail -n+6 | wc -l";
-    } else if (strcmp(distro, "Arch") == 0) {
-        package_command = "pacman -Q | wc -l";
-    } else if (strcmp(distro, "CentOS") == 0) {
-        package_command = "rpm -qa | wc -l";
-    } else {
-        package_command = "Unknown distribution";
+    // List of supported distros
+    const char* supported_distros[] = {
+            "Ubuntu", "Debian", "elementary OS", "Zorin OS", "Pop!_OS", "MX Linux",
+            "Kali Linux", "Parrot OS", "Raspbian", "Raspberry Pi OS",
+            "Arch Linux", "Manjaro", "Artix Linux", "BlueStar", "EndeavourOS",
+            "CentOS", "Fedora", "openSUSE", "Mageia", "AlmaLinux", "Rocky Linux", "Amazon Linux",
+            "Gentoo", "Alpine Linux", "Void Linux",
+            "Slackware", "Solus",
+            "NixOS", "Antergos", "Linux Mint", "Peppermint OS"
+    };
+
+    int supported = 0;
+
+    // Check if the provided distro is in the list of supported distros
+    for (int i = 0; i < sizeof(supported_distros) / sizeof(supported_distros[0]); i++) {
+        if (strcmp(distro, supported_distros[i]) == 0) {
+            supported = 1;
+            break;
+        }
     }
 
+    if (!supported) {
+        printf("Error: Unknown distribution '%s'\n", distro);
+        return; // Return without running the command
+    }
+
+    // Set the package command based on the distro
+    if (strcmp(distro, "Ubuntu") == 0 || strcmp(distro, "Debian") == 0 || strcmp(distro, "elementary OS") == 0 || strcmp(distro, "Zorin OS") == 0 || strcmp(distro, "Pop!_OS") == 0 || strcmp(distro, "MX Linux") == 0 || strcmp(distro, "Kali Linux") == 0 || strcmp(distro, "Parrot OS") == 0 || strcmp(distro, "Raspbian") == 0 || strcmp(distro, "Raspberry Pi OS") == 0) {
+        package_command = "dpkg -l | tail -n+6 | wc -l";
+    } else if (strcmp(distro, "Arch Linux") == 0 || strcmp(distro, "Manjaro") == 0 || strcmp(distro, "Artix Linux") == 0 || strcmp(distro, "BlueStar") == 0 || strcmp(distro, "EndeavourOS") == 0) {
+        package_command = "pacman -Q | wc -l";
+    } else if (strcmp(distro, "CentOS") == 0 || strcmp(distro, "Fedora") == 0 || strcmp(distro, "openSUSE") == 0 || strcmp(distro, "Mageia") == 0 || strcmp(distro, "AlmaLinux") == 0 || strcmp(distro, "Rocky Linux") == 0 || strcmp(distro, "Amazon Linux") == 0) {
+        package_command = "rpm -qa | wc -l";
+    } else if (strcmp(distro, "Gentoo") == 0) {
+        package_command = "equery -q list '*' | wc -l";
+    } else if (strcmp(distro, "Alpine Linux") == 0) {
+        package_command = "apk info | wc -l";
+    } else if (strcmp(distro, "Void Linux") == 0) {
+        package_command = "xbps-query -l | wc -l";
+    } else if (strcmp(distro, "Slackware") == 0) {
+        package_command = "ls /var/log/packages/ | wc -l";
+    } else if (strcmp(distro, "Solus") == 0) {
+        package_command = "eopkg list-installed | wc -l";
+    } else if (strcmp(distro, "NixOS") == 0) {
+        package_command = "nix-env --list-generations | wc -l";
+    } else if (strcmp(distro, "Antergos") == 0) {
+        package_command = "pacman -Q | wc -l";
+    } else if (strcmp(distro, "Linux Mint") == 0) {
+        package_command = "dpkg -l | tail -n+6 | wc -l";
+    } else if (strcmp(distro, "Peppermint OS") == 0) {
+        package_command = "dpkg -l | tail -n+6 | wc -l";
+    }
+
+    // Run the package command and display the result
     FILE* fp = popen(package_command, "r");
     if (fp == NULL) {
         printf("Failed to run command\n");
