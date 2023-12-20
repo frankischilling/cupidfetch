@@ -10,6 +10,8 @@
 #include <pwd.h>
 #include <sys/stat.h>
 #include <ctype.h>
+#include <termios.h>
+#include <libgen.h>
 #include "libs/ini.h"
 
 int get_terminal_width() {
@@ -152,6 +154,47 @@ void get_host_name() {
         exit(EXIT_FAILURE);
     }
     print_info("Host Name", host_name);
+}
+
+const char* get_terminal() {
+    const char* term_program = getenv("TERM");
+    if (term_program == NULL) {
+        // If TERM is not set, return "Unknown"
+        return "Unknown";
+    }
+
+    // Check for common terminal prefixes and remove them
+    const char* prefixes[] = {"xterm", "rxvt", "kitty", "alacritty", "gnome", "terminator", "tmux", /* Add more if needed */};
+    size_t num_prefixes = sizeof(prefixes) / sizeof(prefixes[0]);
+
+    for (size_t i = 0; i < num_prefixes; ++i) {
+        size_t prefix_len = strlen(prefixes[i]);
+        if (strncmp(term_program, prefixes[i], prefix_len) == 0) {
+            // Allocate space for the modified terminal name
+            size_t term_len = strlen(term_program) - prefix_len;
+            char* modified_term = (char*)malloc((term_len + 1) * sizeof(char));
+
+            // Remove the prefix
+            strcpy(modified_term, term_program + prefix_len);
+
+            // Remove leading hyphen if present
+            if (modified_term[0] == '-') {
+                memmove(modified_term, modified_term + 1, term_len);
+                term_len--;
+            }
+
+            // Check for "-text" suffix and remove it
+            size_t suffix_len = strlen("-text");
+            if (term_len > suffix_len && strcmp(modified_term + term_len - suffix_len, "-text") == 0) {
+                modified_term[term_len - suffix_len] = '\0';
+            }
+
+            return modified_term;
+        }
+    }
+
+    // If no recognized prefix is found, return the original TERM value
+    return term_program;
 }
 
 void get_shell() {
@@ -306,6 +349,7 @@ void get_uptime() {
     printf("Uptime         : %d days, %02d:%02d\n", days, hours, minutes);
 }
 
+
 void display_local_ip() {
     struct ifaddrs *ifaddr, *ifa;
     if (getifaddrs(&ifaddr) == -1) {
@@ -380,6 +424,7 @@ struct CupidConfig {
     int display_uptime;
     int display_package_count;
     int display_shell;
+    int display_terminal;
     int display_desktop_environment;
     int display_local_ip;
 };
@@ -420,6 +465,7 @@ void write_config_to_file(const char* config_path, const struct CupidConfig* use
     fprintf(config_file, "uptime = %d\n", user_config->display_uptime);
     fprintf(config_file, "package_count = %d\n", user_config->display_package_count);
     fprintf(config_file, "shell = %d\n", user_config->display_shell);
+    fprintf(config_file, "terminal = %d\n", user_config->display_terminal);
     fprintf(config_file, "desktop_environment = %d\n", user_config->display_desktop_environment);
     fprintf(config_file, "local_ip = %d\n", user_config->display_local_ip);
 
@@ -446,6 +492,8 @@ int iniHandler(void* user, const char* section, const char* name, const char* va
             config->display_package_count = (value != NULL) ? atoi(value) : 1;
         } else if (strcmp(name, "shell") == 0) {
             config->display_shell = (value != NULL) ? atoi(value) : 1;
+        } else if (strcmp(name, "terminal") == 0) {
+            config->display_terminal = (value != NULL) ? atoi(value) : 1;
         } else if (strcmp(name, "desktop_environment") == 0) {
             config->display_desktop_environment = (value != NULL) ? atoi(value) : 1;
         } else if (strcmp(name, "local_ip") == 0) {
@@ -466,6 +514,7 @@ int main() {
             .display_uptime = 1,
             .display_package_count = 1,
             .display_shell = 1,
+            .display_terminal = 1,
             .display_desktop_environment = 1,
             .display_local_ip = 1,
     };
@@ -551,6 +600,10 @@ int main() {
     }
     if (userConfig.display_shell) {
         display_shell();
+    }
+    if (userConfig.display_terminal) {
+        const char* terminal_program = get_terminal();
+        printf("Terminal       : %s\n", terminal_program);
     }
     if (userConfig.display_desktop_environment) {
         get_desktop_environment();
