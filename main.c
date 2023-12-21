@@ -53,6 +53,24 @@ void print_cat(const char* distro) {
     }
 }
 
+void get_host_name() {
+    char host_name[256];
+    if (gethostname(host_name, sizeof(host_name)) != 0) {
+        fprintf(stderr, "Error getting host name\n");
+        exit(EXIT_FAILURE);
+    }
+    print_info("Host Name", host_name, 20, 30);
+}
+
+void get_username() {
+    char* username = getlogin();
+    if (username != NULL) {
+        print_info("Username", username, 20, 30);
+    } else {
+        printf("Error fetching username\n");
+    }
+}
+
 const char* detect_linux_distro() {
     FILE* os_release = fopen("/etc/os-release", "r");
     if (os_release == NULL) {
@@ -157,101 +175,36 @@ const char* detect_linux_distro() {
     return distro;
 }
 
-void get_host_name() {
-    char host_name[256];
-    if (gethostname(host_name, sizeof(host_name)) != 0) {
-        fprintf(stderr, "Error getting host name\n");
-        exit(EXIT_FAILURE);
-    }
-    print_info("Host Name", host_name, 20, 30);
-}
-
-const char* get_terminal() {
-    const char* term_program = getenv("TERM");
-    if (term_program == NULL) {
-        // If TERM is not set, return "Unknown"
-        return "Unknown";
-    }
-
-    // Check for common terminal prefixes and remove them
-    const char* prefixes[] = {"xterm", "rxvt", "kitty", "alacritty", "gnome", "terminator", "tmux", /* Add more if needed */};
-    size_t num_prefixes = sizeof(prefixes) / sizeof(prefixes[0]);
-
-    for (size_t i = 0; i < num_prefixes; ++i) {
-        size_t prefix_len = strlen(prefixes[i]);
-        if (strncmp(term_program, prefixes[i], prefix_len) == 0) {
-            // Allocate space for the modified terminal name
-            size_t term_len = strlen(term_program) - prefix_len;
-            char* modified_term = (char*)malloc((term_len + 1) * sizeof(char));
-
-            // Remove the prefix
-            strcpy(modified_term, term_program + prefix_len);
-
-            // Remove leading hyphen if present
-            if (modified_term[0] == '-') {
-                memmove(modified_term, modified_term + 1, term_len);
-                term_len--;
-            }
-
-            // Check for "-text" suffix and remove it
-            size_t suffix_len = strlen("-text");
-            if (term_len > suffix_len && strcmp(modified_term + term_len - suffix_len, "-text") == 0) {
-                modified_term[term_len - suffix_len] = '\0';
-            }
-
-            return modified_term;
-        }
-    }
-
-    // If no recognized prefix is found, return the original TERM value
-    return term_program;
-}
-
-void get_shell() {
-    FILE *fp;
-    char path[1035];
-
-    fp = popen("basename $SHELL", "r");
-    if (fp == NULL) {
-        printf("Failed to run command\n");
+void get_linux_kernel() {
+    struct utsname uname_data;
+    if (uname(&uname_data) != 0) {
+        fprintf(stderr, "Error getting Linux kernel information\n");
         exit(EXIT_FAILURE);
     }
 
-    fgets(path, sizeof(path) - 1, fp);
-    if (strlen(path) > 0) {
-        path[strlen(path) - 1] = '\0'; // Remove newline character
-    }
-
-    print_info("Shell", path, 20, 30);
-    pclose(fp);
+    print_info("Linux Kernel", uname_data.release, 20, 30);
 }
 
-void get_desktop_environment() {
-    FILE *fp;
-    char path[1035];
-
-    fp = popen("echo $XDG_CURRENT_DESKTOP", "r");
-    if (fp == NULL) {
-        printf("Failed to run command\n");
+void get_uptime() {
+    FILE* uptime_file = fopen("/proc/uptime", "r");
+    if (uptime_file == NULL) {
+        fprintf(stderr, "Error fetching uptime\n");
         exit(EXIT_FAILURE);
     }
 
-    fgets(path, sizeof(path) - 1, fp);
-    if (strlen(path) > 0) {
-        path[strlen(path) - 1] = '\0'; // Remove newline character
+    double uptime;
+    if (fscanf(uptime_file, "%lf", &uptime) != 1) {
+        fprintf(stderr, "Error reading uptime\n");
+        exit(EXIT_FAILURE);
     }
+    fclose(uptime_file);
 
-    print_info("DE", path, 20, 30);
-    pclose(fp);
-}
+    int days = (int)uptime / (60 * 60 * 24);
+    int hours = ((int)uptime % (60 * 60 * 24)) / (60 * 60);
+    int minutes = ((int)uptime % (60 * 60)) / 60;
 
-void get_username() {
-    char* username = getlogin();
-    if (username != NULL) {
-        print_info("Username", username, 20, 30);
-    } else {
-        printf("Error fetching username\n");
-    }
+    // Corrected usage of print_info
+    print_info("Uptime", "%d days, %02d:%02d", 20, 30, days, hours, minutes);
 }
 
 void get_package_count(const char* distro) {
@@ -328,36 +281,83 @@ void get_package_count(const char* distro) {
     pclose(fp);
 }
 
-void get_linux_kernel() {
-    struct utsname uname_data;
-    if (uname(&uname_data) != 0) {
-        fprintf(stderr, "Error getting Linux kernel information\n");
+void get_shell() {
+    FILE *fp;
+    char path[1035];
+
+    fp = popen("basename $SHELL", "r");
+    if (fp == NULL) {
+        printf("Failed to run command\n");
         exit(EXIT_FAILURE);
     }
 
-    print_info("Linux Kernel", uname_data.release, 20, 30);
+    fgets(path, sizeof(path) - 1, fp);
+    if (strlen(path) > 0) {
+        path[strlen(path) - 1] = '\0'; // Remove newline character
+    }
+
+    print_info("Shell", path, 20, 30);
+    pclose(fp);
 }
 
-void get_uptime() {
-    FILE* uptime_file = fopen("/proc/uptime", "r");
-    if (uptime_file == NULL) {
-        fprintf(stderr, "Error fetching uptime\n");
+const char* get_terminal() {
+    const char* term_program = getenv("TERM");
+    if (term_program == NULL) {
+        // If TERM is not set, return "Unknown"
+        return "Unknown";
+    }
+
+    // Check for common terminal prefixes and remove them
+    const char* prefixes[] = {"xterm", "rxvt", "kitty", "alacritty", "gnome", "terminator", "tmux", /* Add more if needed */};
+    size_t num_prefixes = sizeof(prefixes) / sizeof(prefixes[0]);
+
+    for (size_t i = 0; i < num_prefixes; ++i) {
+        size_t prefix_len = strlen(prefixes[i]);
+        if (strncmp(term_program, prefixes[i], prefix_len) == 0) {
+            // Allocate space for the modified terminal name
+            size_t term_len = strlen(term_program) - prefix_len;
+            char* modified_term = (char*)malloc((term_len + 1) * sizeof(char));
+
+            // Remove the prefix
+            strcpy(modified_term, term_program + prefix_len);
+
+            // Remove leading hyphen if present
+            if (modified_term[0] == '-') {
+                memmove(modified_term, modified_term + 1, term_len);
+                term_len--;
+            }
+
+            // Check for "-text" suffix and remove it
+            size_t suffix_len = strlen("-text");
+            if (term_len > suffix_len && strcmp(modified_term + term_len - suffix_len, "-text") == 0) {
+                modified_term[term_len - suffix_len] = '\0';
+            }
+
+            return modified_term;
+        }
+    }
+
+    // If no recognized prefix is found, return the original TERM value
+    return term_program;
+}
+
+void get_desktop_environment() {
+    FILE *fp;
+    char path[1035];
+
+    fp = popen("echo $XDG_CURRENT_DESKTOP", "r");
+    if (fp == NULL) {
+        printf("Failed to run command\n");
         exit(EXIT_FAILURE);
     }
 
-    double uptime;
-    if (fscanf(uptime_file, "%lf", &uptime) != 1) {
-        fprintf(stderr, "Error reading uptime\n");
-        exit(EXIT_FAILURE);
+    fgets(path, sizeof(path) - 1, fp);
+    if (strlen(path) > 0) {
+        path[strlen(path) - 1] = '\0'; // Remove newline character
     }
-    fclose(uptime_file);
 
-    int days = (int)uptime / (60 * 60 * 24);
-    int hours = ((int)uptime % (60 * 60 * 24)) / (60 * 60);
-    int minutes = ((int)uptime % (60 * 60)) / 60;
-
-    // Corrected usage of print_info
-    print_info("Uptime", "%d days, %02d:%02d", 20, 30, days, hours, minutes);
+    print_info("DE", path, 20, 30);
+    pclose(fp);
 }
 
 void display_local_ip() {
