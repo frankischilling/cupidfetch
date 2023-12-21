@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
+#include <sys/sysinfo.h>
 #include <pwd.h>
 #include <sys/stat.h>
 #include <ctype.h>
@@ -385,6 +386,31 @@ void display_local_ip() {
     freeifaddrs(ifaddr);
 }
 
+void get_available_memory() {
+    struct sysinfo sys_info;
+    if (sysinfo(&sys_info) != 0) {
+        fprintf(stderr, "Error getting system information\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Convert bytes to megabytes for readability
+    unsigned long total_memory_mb = sys_info.totalram / (1024 * 1024);
+    unsigned long free_memory_mb = sys_info.freeram / (1024 * 1024);
+
+    print_info("Memory", "%luMB/%luMB", 20, 30, free_memory_mb, total_memory_mb);
+}
+
+const char* get_home_directory() {
+    const char* homeDir;
+    if ((homeDir = getenv("HOME")) == NULL) {
+        struct passwd* pw = getpwuid(getuid());
+        if (pw != NULL) {
+            homeDir = pw->pw_dir;
+        }
+    }
+    return homeDir;
+}
+
 void display_host_name() {
     get_host_name();
 }
@@ -409,15 +435,8 @@ void display_uptime() {
     get_uptime();
 }
 
-const char* get_home_directory() {
-    const char* homeDir;
-    if ((homeDir = getenv("HOME")) == NULL) {
-        struct passwd* pw = getpwuid(getuid());
-        if (pw != NULL) {
-            homeDir = pw->pw_dir;
-        }
-    }
-    return homeDir;
+void display_available_memory() {
+    get_available_memory();
 }
 
 struct CupidConfig {
@@ -431,6 +450,7 @@ struct CupidConfig {
     int display_terminal;
     int display_desktop_environment;
     int display_local_ip;
+    int display_available_memory;
 };
 
 void create_default_config(const char* config_path, const struct CupidConfig* default_config) {
@@ -450,6 +470,7 @@ void create_default_config(const char* config_path, const struct CupidConfig* de
     fprintf(config_file, "shell = %d\n", default_config->display_shell);
     fprintf(config_file, "desktop_environment = %d\n", default_config->display_desktop_environment);
     fprintf(config_file, "local_ip = %d\n", default_config->display_local_ip);
+    fprintf(config_file, "available_memory = %d\n", default_config->display_available_memory);
 
     fclose(config_file);
 }
@@ -472,6 +493,7 @@ void write_config_to_file(const char* config_path, const struct CupidConfig* use
     fprintf(config_file, "terminal = %d\n", user_config->display_terminal);
     fprintf(config_file, "desktop_environment = %d\n", user_config->display_desktop_environment);
     fprintf(config_file, "local_ip = %d\n", user_config->display_local_ip);
+    fprintf(config_file, "available_memory = %d\n", user_config->display_available_memory);
 
     fclose(config_file);
 }
@@ -502,6 +524,8 @@ int iniHandler(void* user, const char* section, const char* name, const char* va
             config->display_desktop_environment = (value != NULL) ? atoi(value) : 1;
         } else if (strcmp(name, "local_ip") == 0) {
             config->display_local_ip = (value != NULL) ? atoi(value) : 1;
+        } else if (strcmp(name, "available_memory") == 0) {
+            config->display_available_memory = (value!= NULL)? atoi(value) : 1;
         }
     }
 
@@ -521,6 +545,7 @@ int main() {
             .display_terminal = 1,
             .display_desktop_environment = 1,
             .display_local_ip = 1,
+            .display_available_memory = 1,
     };
 
     // Determine the home directory of the current user
@@ -624,6 +649,9 @@ int main() {
     }
     if (userConfig.display_local_ip) {
         display_local_ip();
+    }
+    if (userConfig.display_available_memory) {
+        get_available_memory();  // Call get_available_memory only if the option is set to 1
     }
 
     return 0;
