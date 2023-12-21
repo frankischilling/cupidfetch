@@ -182,60 +182,62 @@ void get_uptime() {
     print_info("Uptime", "%d days, %02d:%02d", 20, 30, days, hours, minutes);
 }
 
-void get_package_count(const char* distro) {
+// Define a structure to hold distro-specific information
+struct DistroPackageInfo {
+    const char* distro;
     const char* package_command;
+};
 
-    // List of supported distros
-    const char* supported_distros[] = {
-            "Ubuntu", "Debian", "elementary OS", "Zorin OS", "Pop!_OS", "MX Linux",
-            "Kali Linux", "Parrot OS", "Raspbian", "Raspberry Pi OS",
-            "Arch Linux", "Manjaro", "Artix Linux", "BlueStar", "EndeavourOS",
-            "CentOS", "Fedora", "openSUSE", "Mageia", "AlmaLinux", "Rocky Linux", "Amazon Linux",
-            "Gentoo", "Alpine Linux", "Void Linux",
-            "Slackware", "Solus",
-            "NixOS", "Antergos", "Linux Mint", "Peppermint OS"
+void get_package_count(const char* distro) {
+    const char* package_command = NULL;
+
+    // List of supported distros and their package commands
+    struct DistroPackageInfo supported_distros[] = {
+            {"Ubuntu", "dpkg -l | tail -n+6 | wc -l"},
+            {"Debian", "dpkg -l | tail -n+6 | wc -l"},
+            {"elementary OS", "dpkg -l | tail -n+6 | wc -l"},
+            {"Zorin OS", "dpkg -l | tail -n+6 | wc -l"},
+            {"Pop!_OS", "dpkg -l | tail -n+6 | wc -l"},
+            {"MX Linux", "dpkg -l | tail -n+6 | wc -l"},
+            {"Kali Linux", "dpkg -l | tail -n+6 | wc -l"},
+            {"Parrot OS", "dpkg -l | tail -n+6 | wc -l"},
+            {"Raspbian", "dpkg -l | tail -n+6 | wc -l"},
+            {"Raspberry Pi OS", "dpkg -l | tail -n+6 | wc -l"},
+            {"Arch Linux", "pacman -Q | wc -l"},
+            {"Manjaro", "pacman -Q | wc -l"},
+            {"Artix Linux", "pacman -Q | wc -l"},
+            {"BlueStar", "pacman -Q | wc -l"},
+            {"EndeavourOS", "pacman -Q | wc -l"},
+            {"CentOS", "rpm -qa | wc -l"},
+            {"Fedora", "rpm -qa | wc -l"},
+            {"openSUSE", "rpm -qa | wc -l"},
+            {"Mageia", "rpm -qa | wc -l"},
+            {"AlmaLinux", "rpm -qa | wc -l"},
+            {"Rocky Linux", "rpm -qa | wc -l"},
+            {"Amazon Linux", "rpm -qa | wc -l"},
+            {"Gentoo", "equery -q list '*' | wc -l"},
+            {"Alpine Linux", "apk info | wc -l"},
+            {"Void Linux", "xbps-query -l | wc -l"},
+            {"Slackware", "ls /var/log/packages/ | wc -l"},
+            {"Solus", "eopkg list-installed | wc -l"},
+            {"NixOS", "nix-env --list-generations | wc -l"},
+            {"Antergos", "pacman -Q | wc -l"},
+            {"Linux Mint", "dpkg -l | tail -n+6 | wc -l"},
+            {"Peppermint OS", "dpkg -l | tail -n+6 | wc -l"}
+            // Add more distros as needed
     };
 
-    int supported = 0;
-
-    // Check if the provided distro is in the list of supported distros
+    // Find the package command for the provided distro
     for (int i = 0; i < sizeof(supported_distros) / sizeof(supported_distros[0]); i++) {
-        if (strcmp(distro, supported_distros[i]) == 0) {
-            supported = 1;
+        if (strcmp(distro, supported_distros[i].distro) == 0) {
+            package_command = supported_distros[i].package_command;
             break;
         }
     }
 
-    if (!supported) {
-        printf("Error: Unknown distribution '%s'\n", distro);
+    if (package_command == NULL) {
+        printf("Error: Unsupported distribution '%s'\n", distro);
         return; // Return without running the command
-    }
-
-    // Set the package command based on the distro
-    if (strcmp(distro, "Ubuntu") == 0 || strcmp(distro, "Debian") == 0 || strcmp(distro, "elementary OS") == 0 || strcmp(distro, "Zorin OS") == 0 || strcmp(distro, "Pop!_OS") == 0 || strcmp(distro, "MX Linux") == 0 || strcmp(distro, "Kali Linux") == 0 || strcmp(distro, "Parrot OS") == 0 || strcmp(distro, "Raspbian") == 0 || strcmp(distro, "Raspberry Pi OS") == 0) {
-        package_command = "dpkg -l | tail -n+6 | wc -l";
-    } else if (strcmp(distro, "Arch Linux") == 0 || strcmp(distro, "Manjaro") == 0 || strcmp(distro, "Artix Linux") == 0 || strcmp(distro, "BlueStar") == 0 || strcmp(distro, "EndeavourOS") == 0) {
-        package_command = "pacman -Q | wc -l";
-    } else if (strcmp(distro, "CentOS") == 0 || strcmp(distro, "Fedora") == 0 || strcmp(distro, "openSUSE") == 0 || strcmp(distro, "Mageia") == 0 || strcmp(distro, "AlmaLinux") == 0 || strcmp(distro, "Rocky Linux") == 0 || strcmp(distro, "Amazon Linux") == 0) {
-        package_command = "rpm -qa | wc -l";
-    } else if (strcmp(distro, "Gentoo") == 0) {
-        package_command = "equery -q list '*' | wc -l";
-    } else if (strcmp(distro, "Alpine Linux") == 0) {
-        package_command = "apk info | wc -l";
-    } else if (strcmp(distro, "Void Linux") == 0) {
-        package_command = "xbps-query -l | wc -l";
-    } else if (strcmp(distro, "Slackware") == 0) {
-        package_command = "ls /var/log/packages/ | wc -l";
-    } else if (strcmp(distro, "Solus") == 0) {
-        package_command = "eopkg list-installed | wc -l";
-    } else if (strcmp(distro, "NixOS") == 0) {
-        package_command = "nix-env --list-generations | wc -l";
-    } else if (strcmp(distro, "Antergos") == 0) {
-        package_command = "pacman -Q | wc -l";
-    } else if (strcmp(distro, "Linux Mint") == 0) {
-        package_command = "dpkg -l | tail -n+6 | wc -l";
-    } else if (strcmp(distro, "Peppermint OS") == 0) {
-        package_command = "dpkg -l | tail -n+6 | wc -l";
     }
 
     // Run the package command and display the result
@@ -248,13 +250,14 @@ void get_package_count(const char* distro) {
     char output[100];
     if (fgets(output, sizeof(output), fp) != NULL) {
         output[strcspn(output, "\n")] = 0; // Remove newline character if present
-        print_info("Package Count", output, 20, 30);
+        print_info("Package Count", "%s", 20, 30, output); // Corrected usage
     } else {
         printf("Error reading package count\n");
     }
 
     pclose(fp);
 }
+
 
 void get_shell() {
     FILE *fp;
