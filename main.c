@@ -5,6 +5,7 @@
 #include <sys/utsname.h>
 #include <unistd.h>
 #include <ifaddrs.h>
+#include <errno.h>
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
 #include <pwd.h>
@@ -522,23 +523,29 @@ int main() {
     // Determine the home directory of the current user
     const char* homeDir = get_home_directory();
 
-    // Construct the path for the config file
-    char configPath[256];
-    snprintf(configPath, sizeof(configPath), "%s/.config/cupidfetch/cupidfetch.ini", getenv("HOME"));
-
     // Check if the config directory exists, if not, create it
     const char* configDir = ".config/cupidfetch";
     char configDirPath[256];
     snprintf(configDirPath, sizeof(configDirPath), "%s/%s", homeDir, configDir);
-
-    if (access(configDirPath, F_OK) == -1) {
-        // Directory does not exist, create it
-        if (mkdir(configDirPath, 0700) != 0) {
+    
+    // Create the directory and its parent directories if they don't exist
+    if (mkdir(configDirPath, 0700) != 0 && errno != EEXIST) {
+        // If mkdir failed and the error is not EEXIST, try creating parent directories
+        char parentDirPath[256];
+        snprintf(parentDirPath, sizeof(parentDirPath), "%s/%s", homeDir, ".config");
+        if (mkdir(parentDirPath, 0700) != 0 && errno != EEXIST) {
             fprintf(stderr, "Error creating config directory: %s\n", configDirPath);
+            perror("mkdir");
+            exit(EXIT_FAILURE);
+        }
+    
+        // Retry creating the config directory
+        if (mkdir(configDirPath, 0700) != 0 && errno != EEXIST) {
+            fprintf(stderr, "Error creating config directory: %s\n", configDirPath);
+            perror("mkdir");
             exit(EXIT_FAILURE);
         }
     }
-
     // Fetch system information
     const char* detectedDistro = detect_linux_distro();
     char hostName[256];
