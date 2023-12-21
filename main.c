@@ -5,7 +5,7 @@
 #include <sys/utsname.h>
 #include <unistd.h>
 #include <ifaddrs.h>
-#include <errno.h> 
+#include <errno.h>
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
 #include <pwd.h>
@@ -13,6 +13,7 @@
 #include <ctype.h>
 #include <termios.h>
 #include <libgen.h>
+#include <stdarg.h>
 #include "libs/ini.h"
 
 int get_terminal_width() {
@@ -21,15 +22,22 @@ int get_terminal_width() {
     return w.ws_col;
 }
 
-void print_info(const char *key, const char *value) {
-    int key_length = strlen(key);
-    int padding = 30 - key_length; // Adjust the padding as needed for alignment
-    if (strcmp(key, "Local IP") == 0) {
-        printf("%s%*s: %s\n", key, padding - 2, "", value); // Adjusted padding for "Local IP"
-    } else {
-        printf("%-15s: %s\n", key, value);
-    }
+void print_info(const char *key, const char *format, int align_key, int align_value, ...) {
+    va_list args;
+    va_start(args, align_value);
+
+    // Print the key with left alignment
+    printf("%-*s: ", align_key, key);
+
+    // Print the formatted value with specified alignment
+    vprintf(format, args);
+
+    va_end(args);
+
+    // Add a newline at the end
+    printf("\n");
 }
+
 
 void print_cat(const char* distro) {
     if (strcmp(distro, "Ubuntu") == 0 || strcmp(distro, "Debian") == 0 ||
@@ -154,7 +162,7 @@ void get_host_name() {
         fprintf(stderr, "Error getting host name\n");
         exit(EXIT_FAILURE);
     }
-    print_info("Host Name", host_name);
+    print_info("Host Name", host_name, 20, 30);
 }
 
 const char* get_terminal() {
@@ -213,7 +221,7 @@ void get_shell() {
         path[strlen(path) - 1] = '\0'; // Remove newline character
     }
 
-    print_info("Shell", path);
+    print_info("Shell", path, 20, 30);
     pclose(fp);
 }
 
@@ -232,14 +240,14 @@ void get_desktop_environment() {
         path[strlen(path) - 1] = '\0'; // Remove newline character
     }
 
-    print_info("DE", path);
+    print_info("DE", path, 20, 30);
     pclose(fp);
 }
 
 void get_username() {
     char* username = getlogin();
     if (username != NULL) {
-        print_info("Username", username);
+        print_info("Username", username, 20, 30);
     } else {
         printf("Error fetching username\n");
     }
@@ -311,7 +319,7 @@ void get_package_count(const char* distro) {
     char output[100];
     if (fgets(output, sizeof(output), fp) != NULL) {
         output[strcspn(output, "\n")] = 0; // Remove newline character if present
-        print_info("Package Count", output);
+        print_info("Package Count", output, 20, 30);
     } else {
         printf("Error reading package count\n");
     }
@@ -326,7 +334,7 @@ void get_linux_kernel() {
         exit(EXIT_FAILURE);
     }
 
-    print_info("Linux Kernel", uname_data.release);
+    print_info("Linux Kernel", uname_data.release, 20, 30);
 }
 
 void get_uptime() {
@@ -347,9 +355,9 @@ void get_uptime() {
     int hours = ((int)uptime % (60 * 60 * 24)) / (60 * 60);
     int minutes = ((int)uptime % (60 * 60)) / 60;
 
-    printf("Uptime         : %d days, %02d:%02d\n", days, hours, minutes);
+    // Corrected usage of print_info
+    print_info("Uptime", "%d days, %02d:%02d", 20, 30, days, hours, minutes);
 }
-
 
 void display_local_ip() {
     struct ifaddrs *ifaddr, *ifa;
@@ -368,13 +376,8 @@ void display_local_ip() {
                 continue;
             }
 
-            // Calculate exact padding based on string lengths
-            int key_length = strlen("Local IP");
-            int value_length = strlen(ip_addr);
-            int padding = 28 - (key_length + value_length); // Adjust as needed
-
             // Print with dynamic padding for right alignment
-            printf("%s%*s: %s\n", "Local IP", padding, "", ip_addr);
+            print_info("Local IP", "%s", 20, 30, ip_addr);
             break;
         }
     }
@@ -526,12 +529,12 @@ int main() {
     // Construct the path for the config file
     char configPath[256];
     snprintf(configPath, sizeof(configPath), "%s/.config/cupidfetch/cupidfetch.ini", homeDir);
-    
+
     // Check if the config directory exists, if not, create it
     const char* configDir = ".config/cupidfetch";
     char configDirPath[256];
     snprintf(configDirPath, sizeof(configDirPath), "%s/%s", homeDir, configDir);
-    
+
     if (mkdir(configDirPath, 0700) != 0 && errno != EEXIST) {
         // If mkdir failed and the error is not EEXIST, try creating parent directories
         char parentDirPath[256];
@@ -541,7 +544,7 @@ int main() {
             perror("mkdir");
             exit(EXIT_FAILURE);
         }
-    
+
         // Retry creating the config directory
         if (mkdir(configDirPath, 0700) != 0 && errno != EEXIST) {
             fprintf(stderr, "Error creating config directory: %s\n", configDirPath);
@@ -598,7 +601,7 @@ int main() {
         get_username();
     }
     if (userConfig.display_distro) {
-        print_info("Distro", detectedDistro);
+        print_info("Distro", detectedDistro, 20, 30);
     }
     if (userConfig.display_linux_kernel) {
         display_linux_kernel();
@@ -614,7 +617,7 @@ int main() {
     }
     if (userConfig.display_terminal) {
         const char* terminal_program = get_terminal();
-        printf("Terminal       : %s\n", terminal_program);
+        print_info("Terminal", "%s", 20, 30, terminal_program);
     }
     if (userConfig.display_desktop_environment) {
         get_desktop_environment();
