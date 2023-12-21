@@ -19,6 +19,7 @@ cupidfetch is a system information retrieval tool written in C for Linux systems
 * Terminal
 * Desktop environment
 * Username
+* Memory
 
 **⬜ Enhance visual representation (soon):**
 
