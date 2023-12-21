@@ -71,6 +71,12 @@ void get_username() {
     }
 }
 
+// Define a structure to hold distro information
+struct DistroInfo {
+    const char* shortname;
+    const char* longname;
+};
+
 const char* detect_linux_distro() {
     FILE* os_release = fopen("/etc/os-release", "r");
     if (os_release == NULL) {
@@ -80,6 +86,36 @@ const char* detect_linux_distro() {
 
     char line[256];
     const char* distro = "Unknown";
+
+    // Define an array of DistroInfo structs for supported distros
+    struct DistroInfo supported_distros[] = {
+            {"arch", "Arch Linux"},
+            {"debian", "Debian"},
+            {"ubuntu", "Ubuntu"},
+            {"centos", "CentOS"},
+            {"fedora", "Fedora"},
+            {"redhat", "Red Hat"},
+            {"opensuse", "openSUSE"},
+            {"gentoo", "Gentoo"},
+            {"alpine", "Alpine Linux"},
+            {"slackware", "Slackware"},
+            {"manjaro", "Manjaro"},
+            {"elementary", "elementary OS"},
+            {"mint", "Linux Mint"},
+            {"kali", "Kali Linux"},
+            {"zorin", "Zorin OS"},
+            {"void", "Void Linux"},
+            {"alma", "AlmaLinux"},
+            {"artix", "Artix Linux"},
+            {"endeavouros", "EndeavourOS"},
+            {"mx", "MX Linux"},
+            {"peppermint", "Peppermint OS"},
+            {"pop", "Pop!_OS"},
+            {"solus", "Solus"},
+            {"antergos", "Antergos"},
+            {"mageia", "Mageia"}
+            // Add more distros as needed
+    };
 
     while (fgets(line, sizeof(line), os_release)) {
         if (strstr(line, "ID=") != NULL) {
@@ -91,20 +127,12 @@ const char* detect_linux_distro() {
                 distroId[i] = tolower(distroId[i]);
             }
 
-            // List of supported distros
-            const char* supported_distros[] = {
-                    "arch", "debian", "ubuntu", "centos", "fedora", "redhat", "opensuse",
-                    "gentoo", "alpine", "slackware", "manjaro", "elementary", "mint", "kali",
-                    "zorin", "void", "alma", "artix", "endeavouros", "mx", "peppermint",
-                    "pop", "solus", "antergos", "mageia", "void", "slackware"
-            };
-
-            int supported = 0;
-
             // Check if the distroId is in the list of supported distros
+            int supported = 0;
             for (int i = 0; i < sizeof(supported_distros) / sizeof(supported_distros[0]); i++) {
-                if (strstr(distroId, supported_distros[i]) != NULL) {
+                if (strstr(distroId, supported_distros[i].shortname) != NULL) {
                     supported = 1;
+                    distro = supported_distros[i].longname;
                     break;
                 }
             }
@@ -112,59 +140,6 @@ const char* detect_linux_distro() {
             if (!supported) {
                 printf("Warning: Unknown distribution '%s'\n", distroId);
                 break; // Continue without updating distro
-            }
-
-            // Set the distro based on the detected ID
-            if (strstr(distroId, "arch") != NULL) {
-                distro = "Arch Linux";
-            } else if (strstr(distroId, "debian") != NULL) {
-                distro = "Debian";
-            } else if (strstr(distroId, "ubuntu") != NULL) {
-                distro = "Ubuntu";
-            } else if (strstr(distroId, "centos") != NULL) {
-                distro = "CentOS";
-            } else if (strstr(distroId, "fedora") != NULL) {
-                distro = "Fedora";
-            } else if (strstr(distroId, "redhat") != NULL) {
-                distro = "Red Hat";
-            } else if (strstr(distroId, "opensuse") != NULL) {
-                distro = "openSUSE";
-            } else if (strstr(distroId, "gentoo") != NULL) {
-                distro = "Gentoo";
-            } else if (strstr(distroId, "alpine") != NULL) {
-                distro = "Alpine Linux";
-            } else if (strstr(distroId, "slackware") != NULL) {
-                distro = "Slackware";
-            } else if (strstr(distroId, "manjaro") != NULL) {
-                distro = "Manjaro";
-            } else if (strstr(distroId, "elementary") != NULL) {
-                distro = "elementary OS";
-            } else if (strstr(distroId, "mint") != NULL) {
-                distro = "Linux Mint";
-            } else if (strstr(distroId, "kali") != NULL) {
-                distro = "Kali Linux";
-            } else if (strstr(distroId, "zorin") != NULL) {
-                distro = "Zorin OS";
-            } else if (strstr(distroId, "void") != NULL) {
-                distro = "Void Linux";
-            } else if (strstr(distroId, "alma") != NULL) {
-                distro = "AlmaLinux";
-            } else if (strstr(distroId, "artix") != NULL) {
-                distro = "Artix Linux";
-            } else if (strstr(distroId, "endeavouros") != NULL) {
-                distro = "EndeavourOS";
-            } else if (strstr(distroId, "mx") != NULL) {
-                distro = "MX Linux";
-            } else if (strstr(distroId, "peppermint") != NULL) {
-                distro = "Peppermint OS";
-            } else if (strstr(distroId, "pop") != NULL) {
-                distro = "Pop!_OS";
-            } else if (strstr(distroId, "solus") != NULL) {
-                distro = "Solus";
-            } else if (strstr(distroId, "antergos") != NULL) {
-                distro = "Antergos";
-            } else if (strstr(distroId, "mageia") != NULL) {
-                distro = "Mageia";
             }
 
             break;
