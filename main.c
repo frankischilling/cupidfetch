@@ -524,7 +524,7 @@ int main() {
 
     // Construct the path for the config file
     char configPath[256];
-    snprintf(configPath, sizeof(configPath), "%s/.config/cupidfetch/cupidfetch.ini", homeDir);
+    snprintf(configPath, sizeof(configPath), "%s/.config/cupidfetch/cupidfetch.ini", getenv("HOME"));
 
     // Check if the config directory exists, if not, create it
     const char* configDir = ".config/cupidfetch";
