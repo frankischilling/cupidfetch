@@ -80,6 +80,9 @@ The inih C parser can be integrated into your project either by manually downloa
     * **(WIP)** ASCII art representing the Linux distribution
     * **(WIP)** Unicode icons for different details
 
+##Executing cupidfetch from anywhere
+1. Move the cupidfetch executable to `/usr/local/bin` and then you will be able to execute it from anywhere.
+
 ## Requirements
 
 * Linux system
