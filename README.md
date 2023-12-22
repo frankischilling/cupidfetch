@@ -93,7 +93,40 @@ The inih C parser can be integrated into your project either by manually downloa
 5. **Output:** System information with:
     * **(WIP)** ASCII art representing the Linux distribution
     * **(WIP)** Unicode icons for different details
-  
+
+## Configuration File
+
+The configuration file for `cupidfetch` is located at `~/.config/cupidfetch/cupidfetch.ini`. This file allows you to customize the displayed information by toggling options on or off. Below is an example of the configuration file:
+
+```
+[DisplayOptions]
+host_name = 1
+username = 1
+distro = 1
+linux_kernel = 1
+uptime = 1
+package_count = 1
+shell = 1
+desktop_environment = 1
+local_ip = 1
+available_memory = 1
+```
+
+### Display Options
+
+- `host_name`: Display the host name.
+- `username`: Display the username.
+- `distro`: Display the Linux distribution.
+- `linux_kernel`: Display the Linux kernel version.
+- `uptime`: Display the system uptime.
+- `package_count`: Display the package count.
+- `shell`: Display the shell in use.
+- `desktop_environment`: Display the desktop environment.
+- `local_ip`: Display the local IP address.
+- `available_memory`: Display available memory information.
+
+To customize the displayed information, set the corresponding option to `1` to enable or `0` to disable.
+
 ## Requirements
 
 * Linux system
