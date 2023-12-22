@@ -3,7 +3,7 @@
 ## Overview
 
 ![cupid](images/cupid.png)
-![baby cupid](images/babycupid.png)
+![baby cupid](images/babycupid.jpg)
 
 cupidfetch is a system information retrieval tool written in C for Linux systems. It's a beginner-friendly, work-in-progress hobby project aimed at learning and exploring programming concepts.
 
