@@ -17,6 +17,8 @@
 #include <stdarg.h>
 #include "libs/ini.h"
 
+#define LINUX_PROC_LINE_SZ 128
+
 int get_terminal_width() {
     struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
@@ -294,6 +296,7 @@ const char* get_terminal() {
         if (strncmp(term_program, prefixes[i], prefix_len) == 0) {
             // Allocate space for the modified terminal name
             size_t term_len = strlen(term_program) - prefix_len;
+	    // This thing is never freed btw
             char* modified_term = (char*)malloc((term_len + 1) * sizeof(char));
 
             // Remove the prefix
@@ -365,17 +368,82 @@ void display_local_ip() {
 }
 
 void get_available_memory() {
-    struct sysinfo sys_info;
-    if (sysinfo(&sys_info) != 0) {
-        fprintf(stderr, "Error getting system information\n");
-        exit(EXIT_FAILURE);
+    // Linux-specific implementation
+    // Source: https://github.com/KittyKatt/screenFetch/issues/386#issuecomment-249312716
+    // Also used in neofetch
+    
+    ssize_t mem_avail = -1, mem_total = -1;
+    // ssize_t shall only be used for -1, not other negatives
+    long mem_used = 0;
+    FILE *meminfo;
+    char line[LINUX_PROC_LINE_SZ];
+
+    meminfo = fopen("/proc/meminfo", "r");
+
+    while (fgets(line, sizeof line, meminfo)) {
+	// Where the value corresponding to the key starts
+	char *value = NULL;
+	// value as a number
+	size_t vnum;
+	// len: the length of the key
+	// vlen: the length of the numeric part of the value
+	size_t i, len = 0, vlen = 0;
+
+	for (i = 0; line[i]; i++) {
+	    if (!len && line[i] == ':')
+		len = i;
+	    if (len && !value && isdigit(line[i]))
+		value = &line[i];
+	    if (len && value && isdigit(line[i]))
+		vlen = 1 + &line[i] - value;
+	}
+	if (!len || !vlen || !value)
+	    continue;
+	
+	line[len] = '\0';
+	value[vlen] = '\0';
+	
+	if (1 != sscanf(value, "%zu", &vnum))
+	    continue;
+
+	
+
+	if (0 == strcmp("MemTotal", line)) {
+	    mem_total = vnum;
+	    mem_used += vnum;
+	} else if (0 == strcmp("MemAvailable", line))
+	    mem_avail = vnum;
+	else if (0 == strcmp("Shmem", line))
+	    mem_used += vnum;
+	else if (0 == strcmp("MemFree", line))
+	    mem_used -= vnum;
+	else if (0 == strcmp("Buffers", line))
+	    mem_used -= vnum;
+	else if (0 == strcmp("Cached", line))
+	    mem_used -= vnum;
+	else if (0 == strcmp("SReclaimable", line))
+	    mem_used -= vnum;
+	
+
+	if (mem_total != -1 && mem_avail != -1)
+	    break;
+    }
+    
+    if (mem_avail != -1) {
+	mem_used = mem_total - mem_avail;
     }
 
-    // Convert bytes to megabytes for readability
-    unsigned long total_memory_mb = sys_info.totalram / (1024 * 1024);
-    unsigned long free_memory_mb = sys_info.freeram / (1024 * 1024);
+    // TODO: error handling for mem_total == -1
 
-    print_info("Memory", "%luMB/%luMB", 20, 30, free_memory_mb, total_memory_mb);
+    print_info(
+        "Memory", "%luMiB/%luMiB", 20, 30,
+	// Already in kB
+	mem_used / 1024,
+	mem_total / 1024
+    );
+
+CLEANUP:
+    fclose(meminfo);
 }
 
 const char* get_home_directory() {
