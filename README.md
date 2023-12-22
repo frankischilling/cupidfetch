@@ -75,14 +75,15 @@ The inih C parser can be integrated into your project either by manually downloa
 ## Usage
 1. **Clone** `git clone https://github.com/frankischilling/cupidfetch`
 2. **Compilation:** `gcc -o cupidfetch main.c libs/ini.c`
-3. **Execution:** `./cupidfetch`
-4. **Output:** System information with:
+3. **Execution:**
+   - **To run from the current directory:** `./cupidfetch`
+   - **To run from anywhere:**
+      1. Move the executable to `/usr/local/bin`: `sudo mv cupidfetch /usr/local/bin`
+      2. Execute it directly: `cupidfetch`
+5. **Output:** System information with:
     * **(WIP)** ASCII art representing the Linux distribution
     * **(WIP)** Unicode icons for different details
-
-##Executing cupidfetch from anywhere
-1. Move the cupidfetch executable to `/usr/local/bin` and then you will be able to execute it from anywhere.
-
+  
 ## Requirements
 
 * Linux system
@@ -119,3 +120,5 @@ This project is a work-in-progress for learning and experimentation.
 ## License
 
 [GNU General Public License 2.0 or later](https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html)
+
+
