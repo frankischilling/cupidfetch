@@ -33,6 +33,16 @@ cupidfetch is a system information retrieval tool written in C for Linux systems
 * Simple code
 * Easy to understand and contribute
 
+**Supported Distros:**
+* Debian (Ubuntu, elementary, Mint)
+* Arch (Manjaro, Artix, EndeavourOS)
+* Fedora
+* openSUSE
+* Gentoo
+* Void
+* NixOS
+* And more!
+
 ## Dependencies
 
 cupidfetch relies on the following components and tools:
