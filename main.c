@@ -8,14 +8,10 @@
 #include <errno.h>
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
-#include <sys/sysinfo.h>
 #include <pwd.h>
 #include <sys/stat.h>
 #include <ctype.h>
-#include <termios.h>
-#include <libgen.h>
 #include <stdarg.h>
-#include <stdbool.h>
 #include "libs/ini.h"
 
 #define LINUX_PROC_LINE_SZ 128
