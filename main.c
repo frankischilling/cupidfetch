@@ -15,9 +15,11 @@
 #include <termios.h>
 #include <libgen.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include "libs/ini.h"
 
 #define LINUX_PROC_LINE_SZ 128
+#define KILOBYTES 1024
 
 int get_terminal_width() {
     struct winsize w;
@@ -40,7 +42,6 @@ void print_info(const char *key, const char *format, int align_key, int align_va
     // Add a newline at the end
     printf("\n");
 }
-
 
 void print_cat(const char* distro) {
     if (strcmp(distro, "Ubuntu") == 0 || strcmp(distro, "Debian") == 0 ||
@@ -282,63 +283,94 @@ void get_shell() {
 
 const char* get_terminal() {
     const char* term_program = getenv("TERM");
-    if (term_program == NULL) {
-        // If TERM is not set, return "Unknown"
-        return "Unknown";
-    }
 
-    // Check for common terminal prefixes and remove them
-    const char* prefixes[] = {"xterm", "rxvt", "kitty", "alacritty", "gnome", "terminator", "tmux", /* Add more if needed */};
-    size_t num_prefixes = sizeof(prefixes) / sizeof(prefixes[0]);
-
-    for (size_t i = 0; i < num_prefixes; ++i) {
-        size_t prefix_len = strlen(prefixes[i]);
-        if (strncmp(term_program, prefixes[i], prefix_len) == 0) {
-            // Allocate space for the modified terminal name
-            size_t term_len = strlen(term_program) - prefix_len;
-	    // This thing is never freed btw
-            char* modified_term = (char*)malloc((term_len + 1) * sizeof(char));
-
-            // Remove the prefix
-            strcpy(modified_term, term_program + prefix_len);
-
-            // Remove leading hyphen if present
-            if (modified_term[0] == '-') {
-                memmove(modified_term, modified_term + 1, term_len);
-                term_len--;
+    if (term_program != NULL) {
+        // Get the terminal type from the TERM environment variable
+        return term_program;
+    } else {
+        if (isatty(STDOUT_FILENO)) {
+            // Check if stdout is a terminal
+            struct winsize w;
+            if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == 0) {
+                return "Unknown (Interactive)";
+            } else {
+                return "Unknown (Non-Interactive)";
             }
-
-            // Check for "-text" suffix and remove it
-            size_t suffix_len = strlen("-text");
-            if (term_len > suffix_len && strcmp(modified_term + term_len - suffix_len, "-text") == 0) {
-                modified_term[term_len - suffix_len] = '\0';
-            }
-
-            return modified_term;
+        } else {
+            return "Not a terminal";
         }
     }
-
-    // If no recognized prefix is found, return the original TERM value
-    return term_program;
 }
 
 void get_desktop_environment() {
     FILE *fp;
     char path[1035];
 
+    // Try to get desktop environment using $XDG_CURRENT_DESKTOP
     fp = popen("echo $XDG_CURRENT_DESKTOP", "r");
-    if (fp == NULL) {
-        printf("Failed to run command\n");
-        exit(EXIT_FAILURE);
+    if (fp != NULL) {
+        fgets(path, sizeof(path) - 1, fp);
+        // Check if the string contains non-whitespace characters
+        if (strspn(path, " \t\n") < strlen(path)) {
+            path[strlen(path) - 1] = '\0'; // Remove newline character
+            print_info("DE", path, 20, 30);
+            pclose(fp);
+            return; // Successfully retrieved desktop environment
+        }
+        pclose(fp);
     }
 
-    fgets(path, sizeof(path) - 1, fp);
-    if (strlen(path) > 0) {
-        path[strlen(path) - 1] = '\0'; // Remove newline character
+    // If $XDG_CURRENT_DESKTOP is empty, try other methods
+
+    if (getenv("GNOME_DESKTOP_SESSION_ID") != NULL || getenv("XDG_CURRENT_DESKTOP") != NULL) {
+        print_info("DE", "GNOME", 20, 30);
+        return; // Successfully detected GNOME
     }
 
-    print_info("DE", path, 20, 30);
-    pclose(fp);
+    if (getenv("KDE_FULL_SESSION") != NULL || getenv("KDE_SESSION_VERSION") != NULL) {
+        print_info("DE", "KDE", 20, 30);
+        return; // Successfully detected KDE
+    }
+
+    if (getenv("XFCE_SESSION") != NULL || getenv("XDG_CURRENT_DESKTOP") != NULL) {
+        print_info("DE", "Xfce", 20, 30);
+        return; // Successfully detected Xfce
+    }
+
+    // Method 4: Check for FVWM using ps command
+    fp = popen("ps -e | grep fvwm | grep -v grep", "r");
+    if (fp != NULL && fgets(path, sizeof(path) - 1, fp) != NULL) {
+        print_info("DE", "FVWM", 20, 30);
+        pclose(fp);
+        return; // Successfully detected FVWM
+    }
+    if (fp != NULL) {
+        pclose(fp);
+    }
+
+    if (getenv("LXQT_SESSION") != NULL || getenv("XDG_CURRENT_DESKTOP") != NULL) {
+        print_info("DE", "LXQt", 20, 30);
+        return; // Successfully detected LXQt
+    }
+
+    if (getenv("MATE_DESKTOP_SESSION_ID") != NULL || getenv("XDG_CURRENT_DESKTOP") != NULL) {
+        print_info("DE", "MATE", 20, 30);
+        return; // Successfully detected MATE
+    }
+
+    if (getenv("DESKTOP_SESSION") != NULL && strstr(getenv("DESKTOP_SESSION"), "cinnamon") != NULL) {
+        print_info("DE", "Cinnamon", 20, 30);
+        return; // Successfully detected Cinnamon
+    }
+
+    if (getenv("PANTHEON_DESKTOP_SESSION") != NULL || getenv("XDG_CURRENT_DESKTOP") != NULL) {
+        print_info("DE", "Pantheon", 20, 30);
+        return; // Successfully detected Pantheon
+    }
+
+
+    // Fallback: If all methods fail, print Unknown
+    print_info("DE", "Unknown", 20, 30);
 }
 
 void display_local_ip() {
@@ -371,79 +403,75 @@ void get_available_memory() {
     // Linux-specific implementation
     // Source: https://github.com/KittyKatt/screenFetch/issues/386#issuecomment-249312716
     // Also used in neofetch
-    
     ssize_t mem_avail = -1, mem_total = -1;
-    // ssize_t shall only be used for -1, not other negatives
     long mem_used = 0;
-    FILE *meminfo;
+    FILE* meminfo;
     char line[LINUX_PROC_LINE_SZ];
 
     meminfo = fopen("/proc/meminfo", "r");
 
+    if (meminfo == NULL) {
+        fprintf(stderr, "Error: Failed to open /proc/meminfo\n");
+        return;
+    }
+
     while (fgets(line, sizeof line, meminfo)) {
-	// Where the value corresponding to the key starts
-	char *value = NULL;
-	// value as a number
-	size_t vnum;
-	// len: the length of the key
-	// vlen: the length of the numeric part of the value
-	size_t i, len = 0, vlen = 0;
+        char *value = NULL;
+        size_t vnum;
+        size_t i, len = 0, vlen = 0;
 
-	for (i = 0; line[i]; i++) {
-	    if (!len && line[i] == ':')
-		len = i;
-	    if (len && !value && isdigit(line[i]))
-		value = &line[i];
-	    if (len && value && isdigit(line[i]))
-		vlen = 1 + &line[i] - value;
-	}
-	if (!len || !vlen || !value)
-	    continue;
-	
-	line[len] = '\0';
-	value[vlen] = '\0';
-	
-	if (1 != sscanf(value, "%zu", &vnum))
-	    continue;
+        for (i = 0; line[i]; i++) {
+            if (!len && line[i] == ':')
+                len = i;
+            if (len && !value && isdigit(line[i]))
+                value = &line[i];
+            if (len && value && isdigit(line[i]))
+                vlen = 1 + &line[i] - value;
+        }
+        if (!len || !vlen || !value)
+            continue;
 
-	
+        line[len] = '\0';
+        value[vlen] = '\0';
 
-	if (0 == strcmp("MemTotal", line)) {
-	    mem_total = vnum;
-	    mem_used += vnum;
-	} else if (0 == strcmp("MemAvailable", line))
-	    mem_avail = vnum;
-	else if (0 == strcmp("Shmem", line))
-	    mem_used += vnum;
-	else if (0 == strcmp("MemFree", line))
-	    mem_used -= vnum;
-	else if (0 == strcmp("Buffers", line))
-	    mem_used -= vnum;
-	else if (0 == strcmp("Cached", line))
-	    mem_used -= vnum;
-	else if (0 == strcmp("SReclaimable", line))
-	    mem_used -= vnum;
-	
+        if (1 != sscanf(value, "%zu", &vnum))
+            continue;
 
-	if (mem_total != -1 && mem_avail != -1)
-	    break;
+        if (0 == strcmp("MemTotal", line)) {
+            mem_total = vnum;
+            mem_used += vnum;
+        } else if (0 == strcmp("MemAvailable", line))
+            mem_avail = vnum;
+        else if (0 == strcmp("Shmem", line))
+            mem_used += vnum;
+        else if (0 == strcmp("MemFree", line))
+            mem_used -= vnum;
+        else if (0 == strcmp("Buffers", line))
+            mem_used -= vnum;
+        else if (0 == strcmp("Cached", line))
+            mem_used -= vnum;
+        else if (0 == strcmp("SReclaimable", line))
+            mem_used -= vnum;
+
+        if (mem_total != -1 && mem_avail != -1)
+            break;
     }
-    
+
+    fclose(meminfo);
+
+    if (mem_total == -1) {
+        fprintf(stderr, "Error: Failed to retrieve total memory.\n");
+        return;
+    }
+
     if (mem_avail != -1) {
-	mem_used = mem_total - mem_avail;
+        mem_used = mem_total - mem_avail;
     }
-
-    // TODO: error handling for mem_total == -1
 
     print_info(
-        "Memory", "%luMiB/%luMiB", 20, 30,
-	// Already in kB
-	mem_used / 1024,
-	mem_total / 1024
+            "Memory", "%ld MiB / %ld MiB", 20, 30,
+            mem_used / KILOBYTES, mem_total / KILOBYTES
     );
-
-CLEANUP:
-    fclose(meminfo);
 }
 
 const char* get_home_directory() {
@@ -701,4 +729,8 @@ int main() {
     }
 
     return 0;
-}
+}   
+
+
+
+// Path: libs/ini.h
