@@ -34,9 +34,9 @@ cupidfetch is a system information retrieval tool written in C for Linux systems
 * Easy to understand and contribute
 
 **Supported Distros:**
-* Debian (Ubuntu, elementary, Mint)
-* Arch (Manjaro, Artix, EndeavourOS)
-* Fedora
+* Debian (Ubuntu, elementary, Mint) [Verified ✔️]
+* Arch (Manjaro, Artix, EndeavourOS) [Verified ✔️]
+* Fedora [Verified ✔️]
 * openSUSE
 * Gentoo
 * Void
@@ -84,12 +84,14 @@ The inih C parser can be integrated into your project either by manually downloa
 
 ## Usage
 1. **Clone** `git clone https://github.com/frankischilling/cupidfetch`
-2. **Compilation:** `gcc -o cupidfetch main.c libs/ini.c`
+2. **Compilation:** `gcc -o cupidfetch main.c libs/ini.c` or use the makefile `make`. We plan on having a `make install` soon to automate the process of 3b. 
 3. **Execution:**
    - **To run from the current directory:** `./cupidfetch`
    - **To run from anywhere:**
-      1. Move the executable to `/usr/local/bin`: `sudo mv cupidfetch /usr/local/bin`
-      2. Execute it directly: `cupidfetch`
+      a. Move the executable to `/usr/local/bin`: `sudo mv cupidfetch /usr/local/bin`
+     
+      b. Execute it directly: `cupidfetch`
+4. **Debug** Use `make clean asan` or `make clean ubsan` to check overflows/memory leaks or undefined behavior
 5. **Output:** System information with:
     * **(WIP)** ASCII art representing the Linux distribution
     * **(WIP)** Unicode icons for different details
