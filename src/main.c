@@ -183,12 +183,27 @@ int main() {
             exit(EXIT_FAILURE);
         }
 
+        // Write the updated configuration to the file
+        fprintf(config_file, "[DisplayOptions]\n");
+        fprintf(config_file, "host_name = %d\n", g_userConfig.display_host_name);
+        fprintf(config_file, "username = %d\n", g_userConfig.display_username);
+        fprintf(config_file, "distro = %d\n", g_userConfig.display_distro);
+        fprintf(config_file, "linux_kernel = %d\n", g_userConfig.display_linux_kernel);
+        fprintf(config_file, "uptime = %d\n", g_userConfig.display_uptime);
+        fprintf(config_file, "package_count = %d\n", g_userConfig.display_package_count);
+        fprintf(config_file, "shell = %d\n", g_userConfig.display_shell);
+        fprintf(config_file, "desktop_environment = %d\n", g_userConfig.display_desktop_environment);
+        fprintf(config_file, "window_manager = %d\n", g_userConfig.display_window_manager);
+        fprintf(config_file, "local_ip = %d\n", g_userConfig.display_local_ip);
+        fprintf(config_file, "available_memory = %d\n", g_userConfig.display_available_memory);
+        fprintf(config_file, "memory_unit = %s\n", g_userConfig.memory_unit);
+        fprintf(config_file, "memory_unit_size = %lu\n", g_userConfig.memory_unit_size);
+
         fclose(config_file);
     } else {
         // Config file doesn't exist, create the default configuration file
         create_default_config(configPath, &g_userConfig);
     }
-
 
     // Display system information based on loaded or default user configuration
     if (g_userConfig.display_host_name) {
