@@ -70,8 +70,7 @@ cupidfetch relies on the following components and tools:
 GCC is often available through the package manager of your Linux distribution. For example, on Debian/Ubuntu-based systems, you can install it using:
 
 ```
-sudo apt update
-sudo apt install build-essential
+sudo apt update && sudo apt install build-essential
 ```
 
 ### Git
@@ -116,6 +115,8 @@ shell = 1
 desktop_environment = 1
 local_ip = 1
 available_memory = 1
+memory_unit = MB
+memory_unit_size = 1000000
 ```
 
 ### Display Options
@@ -130,6 +131,8 @@ available_memory = 1
 - `desktop_environment`: Display the desktop environment.
 - `local_ip`: Display the local IP address.
 - `available_memory`: Display available memory information.
+- `memory_unit`: String representation of the unit used for the displaying of the RAM usage
+- `memory_unit_size`: Value in bytes of the forementioned unit
 
 To customize the displayed information, set the corresponding option to `1` to enable or `0` to disable.
 
@@ -156,7 +159,8 @@ Welcome everyone! All skill levels can contribute:
 * **[ ]** Add unicode icons for each info area (ex. terminal icon for what shell you are using)
 * **[ ]** Create and use a function that will get the geometry for each terminal so we arent hard coding values
 * **[X]** Implement a soild function to detect a large amount of distros
-* **[X]** Add memory and storage info
+* **[X]** Add memory info
+* **[ ]** Add storage info
 * **[ ]** Make install 
 * **[X]** Config system using INI files with [inih C parser](https://github.com/benhoyt/inih) (done, pushing soon)
 
