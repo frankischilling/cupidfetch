@@ -15,7 +15,27 @@
 #include "libs/ini.h"
 
 #define LINUX_PROC_LINE_SZ 128
-#define KILOBYTES 1024
+#define MEMORY_UNIT_LEN 128
+
+
+struct CupidConfig {
+    int display_host_name;
+    int display_username;
+    int display_distro;
+    int display_linux_kernel;
+    int display_uptime;
+    int display_package_count;
+    int display_shell;
+    int display_terminal;
+    int display_desktop_environment;
+    int display_local_ip;
+    int display_available_memory;
+    char memory_unit[MEMORY_UNIT_LEN];
+    unsigned long memory_unit_size;
+};
+
+struct CupidConfig userConfig;
+
 
 int get_terminal_width() {
     struct winsize w;
@@ -465,8 +485,11 @@ void get_available_memory() {
     }
 
     print_info(
-            "Memory", "%ld MiB / %ld MiB", 20, 30,
-            mem_used / KILOBYTES, mem_total / KILOBYTES
+            "Memory", "%ld %s / %ld %s", 20, 30,
+            mem_used * 1024 / userConfig.memory_unit_size,
+	    userConfig.memory_unit,
+	    mem_total * 1024 / userConfig.memory_unit_size,
+	    userConfig.memory_unit
     );
 }
 
@@ -509,19 +532,6 @@ void display_available_memory() {
     get_available_memory();
 }
 
-struct CupidConfig {
-    int display_host_name;
-    int display_username;
-    int display_distro;
-    int display_linux_kernel;
-    int display_uptime;
-    int display_package_count;
-    int display_shell;
-    int display_terminal;
-    int display_desktop_environment;
-    int display_local_ip;
-    int display_available_memory;
-};
 
 void create_default_config(const char* config_path, const struct CupidConfig* default_config) {
     FILE* config_file = fopen(config_path, "w");
@@ -541,32 +551,12 @@ void create_default_config(const char* config_path, const struct CupidConfig* de
     fprintf(config_file, "desktop_environment = %d\n", default_config->display_desktop_environment);
     fprintf(config_file, "local_ip = %d\n", default_config->display_local_ip);
     fprintf(config_file, "available_memory = %d\n", default_config->display_available_memory);
+    fprintf(config_file, "memory_unit = %s\n", default_config->memory_unit);
+    fprintf(config_file, "memory_unit_size = %lu\n", default_config->memory_unit_size);
 
     fclose(config_file);
 }
 
-void write_config_to_file(const char* config_path, const struct CupidConfig* user_config) {
-    FILE* config_file = fopen(config_path, "w");
-    if (config_file == NULL) {
-        fprintf(stderr, "Error writing to config file: %s\n", config_path);
-        exit(EXIT_FAILURE);
-    }
-
-    fprintf(config_file, "[DisplayOptions]\n");
-    fprintf(config_file, "host_name = %d\n", user_config->display_host_name);
-    fprintf(config_file, "username = %d\n", user_config->display_username);
-    fprintf(config_file, "distro = %d\n", user_config->display_distro);
-    fprintf(config_file, "linux_kernel = %d\n", user_config->display_linux_kernel);
-    fprintf(config_file, "uptime = %d\n", user_config->display_uptime);
-    fprintf(config_file, "package_count = %d\n", user_config->display_package_count);
-    fprintf(config_file, "shell = %d\n", user_config->display_shell);
-    fprintf(config_file, "terminal = %d\n", user_config->display_terminal);
-    fprintf(config_file, "desktop_environment = %d\n", user_config->display_desktop_environment);
-    fprintf(config_file, "local_ip = %d\n", user_config->display_local_ip);
-    fprintf(config_file, "available_memory = %d\n", user_config->display_available_memory);
-
-    fclose(config_file);
-}
 
 // INI handler function
 int iniHandler(void* user, const char* section, const char* name, const char* value) {
@@ -596,6 +586,10 @@ int iniHandler(void* user, const char* section, const char* name, const char* va
             config->display_local_ip = (value != NULL) ? atoi(value) : 1;
         } else if (strcmp(name, "available_memory") == 0) {
             config->display_available_memory = (value!= NULL)? atoi(value) : 1;
+        } else if (strcmp(name, "memory_unit") == 0) {
+	    if (value) strncpy(config->memory_unit, value, MEMORY_UNIT_LEN);
+        } else if (strcmp(name, "memory_unit_size") == 0) {
+	    config->memory_unit_size = (value != NULL) ? atol(value) : 1024 * 1024;
         }
     }
 
@@ -604,7 +598,7 @@ int iniHandler(void* user, const char* section, const char* name, const char* va
 
 int main() {
     // Declare and initialize the configuration
-    struct CupidConfig userConfig = {
+    struct CupidConfig cfg_ = {
             .display_host_name = 1,
             .display_username = 1,
             .display_distro = 1,
@@ -616,7 +610,10 @@ int main() {
             .display_desktop_environment = 1,
             .display_local_ip = 1,
             .display_available_memory = 1,
+	    .memory_unit = "MiB",
+	    .memory_unit_size = 1024 * 1024,
     };
+    userConfig = cfg_;
 
     // Determine the home directory of the current user
     const char* homeDir = get_home_directory();
