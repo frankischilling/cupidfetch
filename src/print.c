@@ -34,4 +34,3 @@ void print_cat(const char* distro) {
         printf(" > ^ <  cupidfetch");
     }
 }
-

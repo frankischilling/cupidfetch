@@ -1,15 +1,12 @@
 #include "cupidfetch.h"
 
-
 struct CupidConfig g_userConfig;
-
 
 // Define a structure to hold distro information
 struct DistroInfo {
     const char* shortname;
     const char* longname;
 };
-
 
 const char* detect_linux_distro() {
     FILE* os_release = fopen("/etc/os-release", "r");
@@ -90,7 +87,6 @@ const char* detect_linux_distro() {
     return distro;
 }
 
-
 int main() {
     // Declare and initialize the configuration
     struct CupidConfig cfg_ = {
@@ -103,6 +99,7 @@ int main() {
             .display_shell = 1,
             .display_terminal = 1,
             .display_desktop_environment = 1,
+            .display_window_manager = 1,
             .display_local_ip = 1,
             .display_available_memory = 1,
 	    .memory_unit = "MiB",
@@ -209,6 +206,9 @@ int main() {
     if (g_userConfig.display_desktop_environment) {
         get_desktop_environment();
     }
+    if (g_userConfig.display_window_manager) {
+        get_window_manager();
+    }
     if (g_userConfig.display_local_ip) {
         get_local_ip();
     }
@@ -217,6 +217,4 @@ int main() {
     }
 
     return 0;
-}   
-
-
+}

@@ -168,6 +168,83 @@ const char* get_terminal() {
     }
 }
 
+void get_window_manager() {
+    // Only get window managers, not desktop environments
+    // Same logic as get_desktop_environment() but only looking or WMs
+
+    DIR *dir;
+    struct dirent *entry;
+
+    dir = opendir("/proc");
+    if (dir == NULL) {
+        perror("Error opening /proc directory");
+        return;
+    }
+
+    int wmFound = 0;  // Flag to indicate if a window manager has been found
+
+    while ((entry = readdir(dir)) != NULL) {
+        if (entry->d_type == DT_DIR) {
+            char path[256];
+            snprintf(path, sizeof(path), "/proc/%s/cmdline", entry->d_name);
+
+            FILE *cmdlineFile = fopen(path, "r");
+            if (cmdlineFile != NULL) {
+                char cmdline[256];
+                if (fgets(cmdline, sizeof(cmdline), cmdlineFile) != NULL) {
+
+                    // Example: Check if "fvwm" is in the cmdline
+                    if (strstr(cmdline, "fvwm") != NULL) {
+                        print_info("WM", "FVWM", 20, 30);
+                        wmFound = 1;
+                        break;
+                    }
+
+                    if (strstr(cmdline, "i3") != NULL) {
+                        print_info("WM", "i3", 20, 30);
+                        wmFound = 1;
+                        break;
+                    }
+
+                    if (strstr(cmdline, "awesome") != NULL) {
+                        print_info("WM", "Awesome", 20, 30);
+                        wmFound = 1;
+                        break;
+                    }
+
+                    if (strstr(cmdline, "bspwm") != NULL) {
+                        print_info("WM", "bspwm", 20, 30);
+                        wmFound = 1;
+                        break;
+                    }
+
+                    if (strstr(cmdline, "dwm") != NULL) {
+                        print_info("WM", "dwm", 20, 30);
+                        wmFound = 1;
+                        break;
+                    }
+
+                    if (strstr(cmdline, "hyprland") != NULL) {
+                        print_info("WM", "hyprland", 20, 30);
+                        wmFound = 1;
+                        break;
+                    }
+
+                }
+
+                fclose(cmdlineFile);
+            }
+        }
+    }
+
+    closedir(dir);
+
+    // If no desktop environment is detected, print nothing since we dont want to display anything
+    if (!wmFound) {
+        //print_info("WM", "Unknown", 20, 30);
+    }
+}
+
 void get_desktop_environment() {
     // Try to get desktop environment using $XDG_CURRENT_DESKTOP
     const char* xdgDesktop = getenv("XDG_CURRENT_DESKTOP");
@@ -213,13 +290,6 @@ void get_desktop_environment() {
                         break;
                     }
 
-                    // Example: Check if "fvwm" is in the cmdline
-                    if (strstr(cmdline, "fvwm") != NULL) {
-                        print_info("DE", "FVWM", 20, 30);
-                        desktopFound = 1;
-                        break;
-                    }
-
                     if (strstr(cmdline, "xfce4-session") != NULL) {
                         print_info("DE", "XFCE", 20, 30);
                         desktopFound = 1;
@@ -244,36 +314,6 @@ void get_desktop_environment() {
                         break;
                     }
 
-                    if (strstr(cmdline, "i3") != NULL) {
-                        print_info("DE", "i3", 20, 30);
-                        desktopFound = 1;
-                        break;
-                    }
-
-                    if (strstr(cmdline, "awesome") != NULL) {
-                        print_info("DE", "Awesome", 20, 30);
-                        desktopFound = 1;
-                        break;
-                    }
-
-                    if (strstr(cmdline, "bspwm") != NULL) {
-                        print_info("DE", "bspwm", 20, 30);
-                        desktopFound = 1;
-                        break;
-                    }
-
-                    if (strstr(cmdline, "dwm") != NULL) {
-                        print_info("DE", "dwm", 20, 30);
-                        desktopFound = 1;
-                        break;
-                    }
-
-                    if (strstr(cmdline, "hyprland") != NULL) {
-                        print_info("DE", "hyprland", 20, 30);
-                        desktopFound = 1;
-                        break;
-                    }
-
                 }
 
                 fclose(cmdlineFile);
@@ -283,9 +323,9 @@ void get_desktop_environment() {
 
     closedir(dir);
 
-    // If no desktop environment is detected, print Unknown
+    // If no desktop environment is detected, print nothing since we dont want to display anything
     if (!desktopFound) {
-        print_info("DE", "Unknown", 20, 30);
+        //print_info("DE", "Unknown", 20, 30);
     }
 }
 
@@ -403,6 +443,3 @@ const char* get_home_directory() {
     }
     return homeDir;
 }
-
-
-
