@@ -172,10 +172,23 @@ int main() {
             fprintf(stderr, "Error parsing INI file: %s\n", strerror(parse_result));
             exit(EXIT_FAILURE);
         }
+
+        // Update the configuration with new options
+        g_userConfig.display_terminal = 1;  // Add your new options here
+
+        // Save the updated configuration back to the file
+        FILE* config_file = fopen(configPath, "w");
+        if (config_file == NULL) {
+            fprintf(stderr, "Error updating config file: %s\n", configPath);
+            exit(EXIT_FAILURE);
+        }
+
+        fclose(config_file);
     } else {
         // Config file doesn't exist, create the default configuration file
         create_default_config(configPath, &g_userConfig);
     }
+
 
     // Display system information based on loaded or default user configuration
     if (g_userConfig.display_host_name) {
