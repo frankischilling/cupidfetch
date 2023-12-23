@@ -2,9 +2,10 @@
 
 ## Overview
 
+**this is cupid, the cat.**
+
 ![cupid](images/cupid.png)
 
-**this is cupid, the cat.**
 
 ![baby cupid](images/smol.png)
 
