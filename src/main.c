@@ -1,7 +1,6 @@
 #include "cupidfetch.h"
 
 
-struct CupidConfig g_userConfig;
 
 
 // Define a structure to hold distro information
@@ -90,63 +89,14 @@ const char* detect_linux_distro() {
     return distro;
 }
 
-
-int main() {
-    // Declare and initialize the configuration
-    struct CupidConfig cfg_ = {
-            .display_host_name = 1,
-            .display_username = 1,
-            .display_distro = 1,
-            .display_linux_kernel = 1,
-            .display_uptime = 1,
-            .display_package_count = 1,
-            .display_shell = 1,
-            .display_terminal = 1,
-            .display_desktop_environment = 1,
-            .display_local_ip = 1,
-            .display_available_memory = 1,
-	    .memory_unit = "MiB",
-	    .memory_unit_size = 1024 * 1024,
-    };
-    g_userConfig = cfg_;
-
-    // Determine the home directory of the current user
-    const char* homeDir = get_home_directory();
-
-    // Construct the path for the config file
-    char configPath[256];
-    snprintf(configPath, sizeof(configPath), "%s/.config/cupidfetch/cupidfetch.ini", homeDir);
-
-    // Check if the config directory exists, if not, create it
-    const char* configDir = ".config/cupidfetch";
-    char configDirPath[256];
-    snprintf(configDirPath, sizeof(configDirPath), "%s/%s", homeDir, configDir);
-
-    if (mkdir(configDirPath, 0700) != 0 && errno != EEXIST) {
-        // If mkdir failed and the error is not EEXIST, try creating parent directories
-        char parentDirPath[256];
-        snprintf(parentDirPath, sizeof(parentDirPath), "%s/%s", homeDir, ".config");
-        if (mkdir(parentDirPath, 0700) != 0 && errno != EEXIST) {
-            fprintf(stderr, "Error creating config directory: %s\n", configDirPath);
-            perror("mkdir");
-            exit(EXIT_FAILURE);
-        }
-
-        // Retry creating the config directory
-        if (mkdir(configDirPath, 0700) != 0 && errno != EEXIST) {
-            fprintf(stderr, "Error creating config directory: %s\n", configDirPath);
-            perror("mkdir");
-            exit(EXIT_FAILURE);
-        }
-    }
-
+void display_fetch() {
     // Fetch system information
     const char* detectedDistro = detect_linux_distro();
-    char hostName[256];
+    char hostname[256];
     char* username = getlogin();
 
     // Check for errors getting host name
-    if (gethostname(hostName, sizeof(hostName)) != 0) {
+    if (gethostname(hostname, sizeof(hostname)) != 0) {
         fprintf(stderr, "Error getting host name\n");
         exit(EXIT_FAILURE);
     }
@@ -154,11 +104,11 @@ int main() {
     // Calculate alignment spaces
     int artWidth = 18;
     int totalWidth = 50;
-    int textWidth = strlen(username) + strlen(hostName) + 1;
+    int textWidth = strlen(username) + strlen(hostname) + 1;
     int spaces = totalWidth - artWidth - textWidth;
 
     // Display username@hostname
-    printf("\n%*s%s@%s\n", spaces, "", username, hostName);
+    printf("\n%*s%s@%s\n", spaces, "", username, hostname);
 
     // Display cat ASCII art based on the detected distribution
     print_cat(detectedDistro);
@@ -167,54 +117,51 @@ int main() {
     printf("\n");
     printf("-----------------------------------------\n");
 
-    // Check if the config file exists
-    if (access(configPath, F_OK) != -1) {
-        // Config file exists, load configuration from the file
-        int parse_result = ini_parse(configPath, iniHandler, &g_userConfig);
-        if (parse_result < 0) {
-            fprintf(stderr, "Error parsing INI file: %s\n", strerror(parse_result));
-            exit(EXIT_FAILURE);
-        }
-    } else {
-        // Config file doesn't exist, create the default configuration file
-        create_default_config(configPath, &g_userConfig);
+    // Display system information based on loaded or default user configuration
+    if (g_userConfig.display_host_name)           get_hostname();
+    if (g_userConfig.display_username)            get_username();
+    if (g_userConfig.display_distro)              print_info("Distro", detectedDistro, 20, 30);
+    if (g_userConfig.display_linux_kernel)        get_linux_kernel();
+    if (g_userConfig.display_uptime)              get_uptime();
+    if (g_userConfig.display_package_count)       get_package_count(detectedDistro);
+    if (g_userConfig.display_shell)               get_shell();
+    if (g_userConfig.display_terminal)            print_info("Terminal", "%s", 20, 30, get_terminal());
+    if (g_userConfig.display_desktop_environment) get_desktop_environment();
+    if (g_userConfig.display_local_ip)            get_local_ip();
+    if (g_userConfig.display_available_memory)    get_available_memory();
+}
+
+int main() {
+    int parse_result = 0;
+
+    init_g_config();
+
+    if (!isatty(STDIN_FILENO)) {
+        parse_result = ini_parse_file(stdin, cupid_ini_handler, &g_userConfig);
+        goto CONFIGURED;
     }
 
-    // Display system information based on loaded or default user configuration
-    if (g_userConfig.display_host_name) {
-        get_hostname();
+    // Why is obvious stuff commented but the confusing parts are not?
+    // Determine the home directory of the current user
+    const char* home = get_home_directory();
+
+    // Construct the path for the config file
+    char config_path[256];
+    snprintf(config_path, sizeof(config_path), "%s/.config/cupidfetch/cupidfetch.ini", home);
+
+    // Config file exists, load configuration from the file
+    parse_result = ini_parse(config_path, cupid_ini_handler, &g_userConfig);
+
+CONFIGURED:
+
+
+    if (parse_result < 0) {
+        fprintf(stderr, "Error parsing INI file: %s\n", strerror(parse_result));
+        exit(EXIT_FAILURE);
     }
-    if (g_userConfig.display_username) {
-        get_username();
-    }
-    if (g_userConfig.display_distro) {
-        print_info("Distro", detectedDistro, 20, 30);
-    }
-    if (g_userConfig.display_linux_kernel) {
-        get_linux_kernel();
-    }
-    if (g_userConfig.display_uptime) {
-        get_uptime();
-    }
-    if (g_userConfig.display_package_count) {
-        get_package_count(detectedDistro);
-    }
-    if (g_userConfig.display_shell) {
-        get_shell();
-    }
-    if (g_userConfig.display_terminal) {
-        const char* terminal_program = get_terminal();
-        print_info("Terminal", "%s", 20, 30, terminal_program);
-    }
-    if (g_userConfig.display_desktop_environment) {
-        get_desktop_environment();
-    }
-    if (g_userConfig.display_local_ip) {
-        get_local_ip();
-    }
-    if (g_userConfig.display_available_memory) {
-        get_available_memory();  // Call get_available_memory only if the option is set to 1
-    }
+
+
+    display_fetch();
 
     return 0;
 }   

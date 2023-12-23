@@ -191,7 +191,7 @@ void get_desktop_environment() {
 
     while ((entry = readdir(dir)) != NULL) {
         if (entry->d_type == DT_DIR) {
-            char path[256];
+            char path[270];
             snprintf(path, sizeof(path), "/proc/%s/cmdline", entry->d_name);
 
             FILE *cmdlineFile = fopen(path, "r");

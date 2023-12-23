@@ -17,7 +17,6 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <dirent.h>
-
 // Inih
 #include <ini.h>
 
@@ -40,17 +39,14 @@ struct CupidConfig {
     unsigned long memory_unit_size;
 };
 
-extern struct CupidConfig g_userConfig;
 
-
-
-
+// print.c
 int get_terminal_width();
 void print_info(const char *key, const char *format, int align_key, int align_value, ...);
 void print_cat(const char* distro);
 
 
-
+// modules.c
 void get_hostname();
 void get_username();
 void get_linux_kernel();
@@ -64,8 +60,11 @@ void get_available_memory();
 const char* get_home_directory();
 
 
+// config.c
+extern struct CupidConfig g_userConfig;
+void init_g_config();
 void create_default_config(const char* config_path, const struct CupidConfig* default_config);
-int iniHandler(void* user, const char* section, const char* name, const char* value);
+int cupid_ini_handler(void* user, const char* section, const char* name, const char* value);
 
 #endif
 

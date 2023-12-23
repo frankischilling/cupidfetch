@@ -1,5 +1,28 @@
 #include "cupidfetch.h"
 
+struct CupidConfig g_userConfig;
+
+
+void init_g_config() {
+    struct CupidConfig cfg_ = {
+        .display_host_name = 1,
+        .display_username = 1,
+        .display_distro = 1,
+        .display_linux_kernel = 1,
+        .display_uptime = 1,
+        .display_package_count = 1,
+        .display_shell = 1,
+        .display_terminal = 1,
+        .display_desktop_environment = 1,
+        .display_local_ip = 1,
+        .display_available_memory = 1,
+	.memory_unit = "MiB",
+        .memory_unit_size = 1024 * 1024,
+    };
+    g_userConfig = cfg_;
+}
+
+
 void create_default_config(const char* config_path, const struct CupidConfig* default_config) {
     FILE* config_file = fopen(config_path, "w");
     if (config_file == NULL) {
@@ -25,7 +48,7 @@ void create_default_config(const char* config_path, const struct CupidConfig* de
 }
 
 // INI handler function
-int iniHandler(void* user, const char* section, const char* name, const char* value) {
+int cupid_ini_handler(void* user, const char* section, const char* name, const char* value) {
     struct CupidConfig* config = (struct CupidConfig*)user;
 
     // Check the section and update corresponding display options
