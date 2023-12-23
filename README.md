@@ -88,7 +88,7 @@ The inih C parser can be integrated into your project either by manually downloa
 
 ## Usage
 1. **Clone** `git clone https://github.com/frankischilling/cupidfetch`
-2. **Compilation:** `gcc -o cupidfetch main.c libs/ini.c` or use the makefile `make`. We plan on having a `make install` soon. 
+2. **Compilation:** `gcc -o cupidfetch src/config.c src/main.c src/modules.c src/print.c libs/ini.c` or use the makefile `make`. We plan on having a `make install` soon. 
 3. **Execution:**
    - **To run from the current directory:** `./cupidfetch`
    - **To run from anywhere:**
