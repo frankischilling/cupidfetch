@@ -17,7 +17,6 @@
 #define LINUX_PROC_LINE_SZ 128
 #define MEMORY_UNIT_LEN 128
 
-
 struct CupidConfig {
     int display_host_name;
     int display_username;
@@ -35,7 +34,6 @@ struct CupidConfig {
 };
 
 struct CupidConfig userConfig;
-
 
 int get_terminal_width() {
     struct winsize w;
