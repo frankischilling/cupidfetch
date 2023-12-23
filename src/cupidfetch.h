@@ -33,6 +33,7 @@ struct CupidConfig {
     int display_shell;
     int display_terminal;
     int display_desktop_environment;
+    int display_window_manager;
     int display_local_ip;
     int display_available_memory;
     char memory_unit[MEMORY_UNIT_LEN];
@@ -55,6 +56,7 @@ void get_package_count(const char* distro);
 void get_shell();
 const char* get_terminal();
 void get_desktop_environment();
+void get_window_manager();
 void get_local_ip();
 void get_available_memory();
 const char* get_home_directory();
@@ -67,4 +69,3 @@ void create_default_config(const char* config_path, const struct CupidConfig* de
 int cupid_ini_handler(void* user, const char* section, const char* name, const char* value);
 
 #endif
-

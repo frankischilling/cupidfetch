@@ -39,6 +39,7 @@ void create_default_config(const char* config_path, const struct CupidConfig* de
     fprintf(config_file, "package_count = %d\n", default_config->display_package_count);
     fprintf(config_file, "shell = %d\n", default_config->display_shell);
     fprintf(config_file, "desktop_environment = %d\n", default_config->display_desktop_environment);
+    fprintf(config_file, "window_manager = %d\n", default_config->display_local_ip);
     fprintf(config_file, "local_ip = %d\n", default_config->display_local_ip);
     fprintf(config_file, "available_memory = %d\n", default_config->display_available_memory);
     fprintf(config_file, "memory_unit = %s\n", default_config->memory_unit);
@@ -71,6 +72,8 @@ int cupid_ini_handler(void* user, const char* section, const char* name, const c
             config->display_terminal = (value != NULL) ? atoi(value) : 1;
         } else if (strcmp(name, "desktop_environment") == 0) {
             config->display_desktop_environment = (value != NULL) ? atoi(value) : 1;
+        } else if (strcmp(name, "window_manager") == 0) {
+            config->display_local_ip = (value != NULL) ? atoi(value) : 1;
         } else if (strcmp(name, "local_ip") == 0) {
             config->display_local_ip = (value != NULL) ? atoi(value) : 1;
         } else if (strcmp(name, "available_memory") == 0) {
@@ -84,6 +87,3 @@ int cupid_ini_handler(void* user, const char* section, const char* name, const c
 
     return 1;
 }
-
-
-

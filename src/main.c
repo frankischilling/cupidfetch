@@ -1,14 +1,11 @@
 #include "cupidfetch.h"
 
 
-
-
 // Define a structure to hold distro information
 struct DistroInfo {
     const char* shortname;
     const char* longname;
 };
-
 
 const char* detect_linux_distro() {
     FILE* os_release = fopen("/etc/os-release", "r");
@@ -164,6 +161,4 @@ CONFIGURED:
     display_fetch();
 
     return 0;
-}   
-
-
+}
