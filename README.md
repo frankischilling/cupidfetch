@@ -149,15 +149,15 @@ Welcome everyone! All skill levels can contribute:
 
 ## To-do list
 
-* **[ ]** Clean code and info display overall
+* **[X]** Clean code and info display overall
 * **[ ]** Add ASCII art for each distro with custom kitty art
 * **[ ]** Add colors at the bottom
 * **[ ]** Fix alignment with text for proper ASCII art display
 * **[ ]** Add unicode icons for each info area (ex. terminal icon for what shell you are using)
 * **[ ]** Create and use a function that will get the geometry for each terminal so we arent hard coding values
 * **[X]** Implement a soild function to detect a large amount of distros
-* **[ ]** Add memory and storage info
-* **[ ]** Make sure you can execute cupidfetch at any point in the system (right now you have to be in the directory)
+* **[X]** Add memory and storage info
+* **[ ]** Make install 
 * **[X]** Config system using INI files with [inih C parser](https://github.com/benhoyt/inih) (done, pushing soon)
 
 ![Intended UI](images/ui.png)
