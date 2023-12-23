@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <dirent.h>
 #include "libs/ini.h"
 
 #define LINUX_PROC_LINE_SZ 128
@@ -33,7 +34,8 @@ struct CupidConfig {
     unsigned long memory_unit_size;
 };
 
-struct CupidConfig userConfig;
+struct CupidConfig g_userConfig;
+
 
 int get_terminal_width() {
     struct winsize w;
@@ -105,7 +107,7 @@ const char* detect_linux_distro() {
     const char* distro = "Unknown";
 
     // Define an array of DistroInfo structs for supported distros
-    struct DistroInfo supported_distros[] = {
+    const struct DistroInfo supported_distros[] = {
             {"arch", "Arch Linux"},
             {"debian", "Debian"},
             {"ubuntu", "Ubuntu"},
@@ -137,16 +139,21 @@ const char* detect_linux_distro() {
     while (fgets(line, sizeof(line), os_release)) {
         if (strstr(line, "ID=") != NULL) {
             char* distroId = strchr(line, '=') + 1;
-            distroId[strcspn(distroId, "\n")] = '\0';
+            size_t len = strlen(distroId);
+
+            // Remove trailing newline character if present
+            if (len > 0 && distroId[len - 1] == '\n') {
+                distroId[len - 1] = '\0';
+            }
 
             // Convert to lowercase for case-insensitive comparison
-            for (int i = 0; distroId[i]; i++) {
+            for (size_t i = 0; distroId[i]; i++) {
                 distroId[i] = tolower(distroId[i]);
             }
 
             // Check if the distroId is in the list of supported distros
             int supported = 0;
-            for (int i = 0; i < sizeof(supported_distros) / sizeof(supported_distros[0]); i++) {
+            for (size_t i = 0; i < sizeof(supported_distros) / sizeof(supported_distros[0]); i++) {
                 if (strstr(distroId, supported_distros[i].shortname) != NULL) {
                     supported = 1;
                     distro = supported_distros[i].longname;
@@ -275,24 +282,26 @@ void get_package_count(const char* distro) {
     pclose(fp);
 }
 
-
 void get_shell() {
-    FILE *fp;
-    char path[1035];
+    uid_t uid = geteuid();
+    struct passwd *pw = getpwuid(uid);
 
-    fp = popen("basename $SHELL", "r");
-    if (fp == NULL) {
-        printf("Failed to run command\n");
-        exit(EXIT_FAILURE);
+    if (pw != NULL) {
+        // Extract the shell from the password file entry
+        const char *shell = pw->pw_shell;
+
+        if (shell != NULL) {
+            // Extract the base name of the shell
+            const char *baseName = strrchr(shell, '/');
+            baseName = (baseName != NULL) ? baseName + 1 : shell;
+
+            print_info("Shell", baseName, 20, 30);
+            return;
+        }
     }
 
-    fgets(path, sizeof(path) - 1, fp);
-    if (strlen(path) > 0) {
-        path[strlen(path) - 1] = '\0'; // Remove newline character
-    }
-
-    print_info("Shell", path, 20, 30);
-    pclose(fp);
+    // Fallback: Print unknown if shell cannot be determined
+    print_info("Shell", "Unknown", 20, 30);
 }
 
 const char* get_terminal() {
@@ -317,74 +326,124 @@ const char* get_terminal() {
 }
 
 void get_desktop_environment() {
-    FILE *fp;
-    char path[1035];
-
     // Try to get desktop environment using $XDG_CURRENT_DESKTOP
-    fp = popen("echo $XDG_CURRENT_DESKTOP", "r");
-    if (fp != NULL) {
-        fgets(path, sizeof(path) - 1, fp);
-        // Check if the string contains non-whitespace characters
-        if (strspn(path, " \t\n") < strlen(path)) {
-            path[strlen(path) - 1] = '\0'; // Remove newline character
-            print_info("DE", path, 20, 30);
-            pclose(fp);
-            return; // Successfully retrieved desktop environment
+    const char* xdgDesktop = getenv("XDG_CURRENT_DESKTOP");
+    if (xdgDesktop != NULL && strlen(xdgDesktop) > 0) {
+        print_info("DE", xdgDesktop, 20, 30);
+        return; // Successfully retrieved desktop environment
+    }
+
+    // If $XDG_CURRENT_DESKTOP is empty or not found, try checking processes
+
+    DIR *dir;
+    struct dirent *entry;
+
+    dir = opendir("/proc");
+    if (dir == NULL) {
+        perror("Error opening /proc directory");
+        return;
+    }
+
+    int desktopFound = 0;  // Flag to indicate if a desktop environment has been found
+
+    while ((entry = readdir(dir)) != NULL) {
+        if (entry->d_type == DT_DIR) {
+            char path[256];
+            snprintf(path, sizeof(path), "/proc/%s/cmdline", entry->d_name);
+
+            FILE *cmdlineFile = fopen(path, "r");
+            if (cmdlineFile != NULL) {
+                char cmdline[256];
+                if (fgets(cmdline, sizeof(cmdline), cmdlineFile) != NULL) {
+
+                    // Example: Check if "gnome-shell" is in the cmdline
+                    if (strstr(cmdline, "gnome-shell") != NULL) {
+                        print_info("DE", "GNOME", 20, 30);
+                        desktopFound = 1;
+                        break;
+                    }
+
+                    // Example: Check if "plasma-desktop" is in the cmdline
+                    if (strstr(cmdline, "plasma-desktop") != NULL) {
+                        print_info("DE", "KDE Plasma", 20, 30);
+                        desktopFound = 1;
+                        break;
+                    }
+
+                    // Example: Check if "fvwm" is in the cmdline
+                    if (strstr(cmdline, "fvwm") != NULL) {
+                        print_info("DE", "FVWM", 20, 30);
+                        desktopFound = 1;
+                        break;
+                    }
+
+                    if (strstr(cmdline, "xfce4-session") != NULL) {
+                        print_info("DE", "XFCE", 20, 30);
+                        desktopFound = 1;
+                        break;
+                    }
+
+                    if (strstr(cmdline, "mate-session") != NULL) {
+                        print_info("DE", "MATE", 20, 30);
+                        desktopFound = 1;
+                        break;
+                    }
+
+                    if (strstr(cmdline, "lxqt-session") != NULL) {
+                        print_info("DE", "LXQt", 20, 30);
+                        desktopFound = 1;
+                        break;
+                    }
+
+                    if (strstr(cmdline, "lxde-session") != NULL) {
+                        print_info("DE", "LXDE", 20, 30);
+                        desktopFound = 1;
+                        break;
+                    }
+
+                    if (strstr(cmdline, "i3") != NULL) {
+                        print_info("DE", "i3", 20, 30);
+                        desktopFound = 1;
+                        break;
+                    }
+
+                    if (strstr(cmdline, "awesome") != NULL) {
+                        print_info("DE", "Awesome", 20, 30);
+                        desktopFound = 1;
+                        break;
+                    }
+
+                    if (strstr(cmdline, "bspwm") != NULL) {
+                        print_info("DE", "bspwm", 20, 30);
+                        desktopFound = 1;
+                        break;
+                    }
+
+                    if (strstr(cmdline, "dwm") != NULL) {
+                        print_info("DE", "dwm", 20, 30);
+                        desktopFound = 1;
+                        break;
+                    }
+
+                    if (strstr(cmdline, "hyprland") != NULL) {
+                        print_info("DE", "hyprland", 20, 30);
+                        desktopFound = 1;
+                        break;
+                    }
+
+                }
+
+                fclose(cmdlineFile);
+            }
         }
-        pclose(fp);
     }
 
-    // If $XDG_CURRENT_DESKTOP is empty, try other methods
+    closedir(dir);
 
-    if (getenv("GNOME_DESKTOP_SESSION_ID") != NULL || getenv("XDG_CURRENT_DESKTOP") != NULL) {
-        print_info("DE", "GNOME", 20, 30);
-        return; // Successfully detected GNOME
+    // If no desktop environment is detected, print Unknown
+    if (!desktopFound) {
+        print_info("DE", "Unknown", 20, 30);
     }
-
-    if (getenv("KDE_FULL_SESSION") != NULL || getenv("KDE_SESSION_VERSION") != NULL) {
-        print_info("DE", "KDE", 20, 30);
-        return; // Successfully detected KDE
-    }
-
-    if (getenv("XFCE_SESSION") != NULL || getenv("XDG_CURRENT_DESKTOP") != NULL) {
-        print_info("DE", "Xfce", 20, 30);
-        return; // Successfully detected Xfce
-    }
-
-    // Method 4: Check for FVWM using ps command
-    fp = popen("ps -e | grep fvwm | grep -v grep", "r");
-    if (fp != NULL && fgets(path, sizeof(path) - 1, fp) != NULL) {
-        print_info("DE", "FVWM", 20, 30);
-        pclose(fp);
-        return; // Successfully detected FVWM
-    }
-    if (fp != NULL) {
-        pclose(fp);
-    }
-
-    if (getenv("LXQT_SESSION") != NULL || getenv("XDG_CURRENT_DESKTOP") != NULL) {
-        print_info("DE", "LXQt", 20, 30);
-        return; // Successfully detected LXQt
-    }
-
-    if (getenv("MATE_DESKTOP_SESSION_ID") != NULL || getenv("XDG_CURRENT_DESKTOP") != NULL) {
-        print_info("DE", "MATE", 20, 30);
-        return; // Successfully detected MATE
-    }
-
-    if (getenv("DESKTOP_SESSION") != NULL && strstr(getenv("DESKTOP_SESSION"), "cinnamon") != NULL) {
-        print_info("DE", "Cinnamon", 20, 30);
-        return; // Successfully detected Cinnamon
-    }
-
-    if (getenv("PANTHEON_DESKTOP_SESSION") != NULL || getenv("XDG_CURRENT_DESKTOP") != NULL) {
-        print_info("DE", "Pantheon", 20, 30);
-        return; // Successfully detected Pantheon
-    }
-
-
-    // Fallback: If all methods fail, print Unknown
-    print_info("DE", "Unknown", 20, 30);
 }
 
 void display_local_ip() {
@@ -484,10 +543,10 @@ void get_available_memory() {
 
     print_info(
             "Memory", "%ld %s / %ld %s", 20, 30,
-            mem_used * 1024 / userConfig.memory_unit_size,
-	    userConfig.memory_unit,
-	    mem_total * 1024 / userConfig.memory_unit_size,
-	    userConfig.memory_unit
+            mem_used * 1024 / g_userConfig.memory_unit_size,
+	    g_userConfig.memory_unit,
+	    mem_total * 1024 / g_userConfig.memory_unit_size,
+        g_userConfig.memory_unit
     );
 }
 
@@ -530,7 +589,6 @@ void display_available_memory() {
     get_available_memory();
 }
 
-
 void create_default_config(const char* config_path, const struct CupidConfig* default_config) {
     FILE* config_file = fopen(config_path, "w");
     if (config_file == NULL) {
@@ -554,7 +612,6 @@ void create_default_config(const char* config_path, const struct CupidConfig* de
 
     fclose(config_file);
 }
-
 
 // INI handler function
 int iniHandler(void* user, const char* section, const char* name, const char* value) {
@@ -611,7 +668,7 @@ int main() {
 	    .memory_unit = "MiB",
 	    .memory_unit_size = 1024 * 1024,
     };
-    userConfig = cfg_;
+    g_userConfig = cfg_;
 
     // Determine the home directory of the current user
     const char* homeDir = get_home_directory();
@@ -673,55 +730,53 @@ int main() {
     // Check if the config file exists
     if (access(configPath, F_OK) != -1) {
         // Config file exists, load configuration from the file
-        int parse_result = ini_parse(configPath, iniHandler, &userConfig);
+        int parse_result = ini_parse(configPath, iniHandler, &g_userConfig);
         if (parse_result < 0) {
             fprintf(stderr, "Error parsing INI file: %s\n", strerror(parse_result));
             exit(EXIT_FAILURE);
         }
     } else {
         // Config file doesn't exist, create the default configuration file
-        create_default_config(configPath, &userConfig);
+        create_default_config(configPath, &g_userConfig);
     }
 
     // Display system information based on loaded or default user configuration
-    if (userConfig.display_host_name) {
+    if (g_userConfig.display_host_name) {
         display_host_name();
     }
-    if (userConfig.display_username) {
+    if (g_userConfig.display_username) {
         get_username();
     }
-    if (userConfig.display_distro) {
+    if (g_userConfig.display_distro) {
         print_info("Distro", detectedDistro, 20, 30);
     }
-    if (userConfig.display_linux_kernel) {
+    if (g_userConfig.display_linux_kernel) {
         display_linux_kernel();
     }
-    if (userConfig.display_uptime) {
+    if (g_userConfig.display_uptime) {
         display_uptime();
     }
-    if (userConfig.display_package_count) {
+    if (g_userConfig.display_package_count) {
         display_package_count(detectedDistro);
     }
-    if (userConfig.display_shell) {
+    if (g_userConfig.display_shell) {
         display_shell();
     }
-    if (userConfig.display_terminal) {
+    if (g_userConfig.display_terminal) {
         const char* terminal_program = get_terminal();
         print_info("Terminal", "%s", 20, 30, terminal_program);
     }
-    if (userConfig.display_desktop_environment) {
+    if (g_userConfig.display_desktop_environment) {
         get_desktop_environment();
     }
-    if (userConfig.display_local_ip) {
+    if (g_userConfig.display_local_ip) {
         display_local_ip();
     }
-    if (userConfig.display_available_memory) {
+    if (g_userConfig.display_available_memory) {
         get_available_memory();  // Call get_available_memory only if the option is set to 1
     }
 
     return 0;
 }   
-
-
 
 // Path: libs/ini.h
