@@ -114,10 +114,11 @@ uptime = 1
 package_count = 1
 shell = 1
 desktop_environment = 1
+window_manager = 1
 local_ip = 1
 available_memory = 1
-memory_unit = MB
-memory_unit_size = 1000000
+memory_unit = MiB
+memory_unit_size = 1048576
 ```
 
 ### Display Options
