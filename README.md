@@ -158,10 +158,11 @@ Welcome everyone! All skill levels can contribute:
 * **[ ]** Add colors at the bottom
 * **[ ]** Fix alignment with text for proper ASCII art display
 * **[ ]** Add unicode icons for each info area (ex. terminal icon for what shell you are using)
-* **[ ]** Create and use a function that will get the geometry for each terminal so we arent hard coding values
-* **[X]** Implement a soild function to detect a large amount of distros
+* **[ ]** Create and use a function that will get the geometry for each terminal so we aren't hard coding values
+* **[X]** Implement a solid function to detect a large amount of distros
 * **[X]** Add memory info
 * **[ ]** Add storage info
+* **[ ]** Fix terminal info, DE, and WM info and include more support
 * **[ ]** Make install 
 * **[X]** Config system using INI files with [inih C parser](https://github.com/benhoyt/inih) (done, pushing soon)
 
