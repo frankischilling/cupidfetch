@@ -126,6 +126,7 @@ void display_fetch() {
     if (g_userConfig.display_desktop_environment) get_desktop_environment();
     if (g_userConfig.display_local_ip)            get_local_ip();
     if (g_userConfig.display_available_memory)    get_available_memory();
+    if (g_userConfig.display_available_storage)   get_available_storage();
 }
 
 int main() {

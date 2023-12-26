@@ -38,8 +38,9 @@ struct CupidConfig {
     int display_available_memory;
     char memory_unit[MEMORY_UNIT_LEN];
     unsigned long memory_unit_size;
+    int display_available_storage;
+    char storage_unit[MEMORY_UNIT_LEN];
 };
-
 
 // print.c
 int get_terminal_width();
@@ -59,6 +60,7 @@ void get_desktop_environment();
 void get_window_manager();
 void get_local_ip();
 void get_available_memory();
+void get_available_storage();
 const char* get_home_directory();
 
 

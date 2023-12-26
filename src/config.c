@@ -14,10 +14,13 @@ void init_g_config() {
         .display_shell = 1,
         .display_terminal = 1,
         .display_desktop_environment = 1,
+        .display_window_manager = 1,
         .display_local_ip = 1,
         .display_available_memory = 1,
-	.memory_unit = "MiB",
+	    .memory_unit = "MiB",
         .memory_unit_size = 1024 * 1024,
+        .display_available_storage = 1,
+        .storage_unit = "GB",
     };
     g_userConfig = cfg_;
 }
@@ -44,6 +47,8 @@ void create_default_config(const char* config_path, const struct CupidConfig* de
     fprintf(config_file, "available_memory = %d\n", default_config->display_available_memory);
     fprintf(config_file, "memory_unit = %s\n", default_config->memory_unit);
     fprintf(config_file, "memory_unit_size = %lu\n", default_config->memory_unit_size);
+    fprintf(config_file, "available_storage =  %d\n", default_config->display_available_storage);
+    fprintf(config_file, "storage_unit = %s\n", default_config->storage_unit);
 
     fclose(config_file);
 }
@@ -73,7 +78,7 @@ int cupid_ini_handler(void* user, const char* section, const char* name, const c
         } else if (strcmp(name, "desktop_environment") == 0) {
             config->display_desktop_environment = (value != NULL) ? atoi(value) : 1;
         } else if (strcmp(name, "window_manager") == 0) {
-            config->display_local_ip = (value != NULL) ? atoi(value) : 1;
+            config->display_window_manager = (value != NULL) ? atoi(value) : 1;
         } else if (strcmp(name, "local_ip") == 0) {
             config->display_local_ip = (value != NULL) ? atoi(value) : 1;
         } else if (strcmp(name, "available_memory") == 0) {
@@ -82,7 +87,12 @@ int cupid_ini_handler(void* user, const char* section, const char* name, const c
 	    if (value) strncpy(config->memory_unit, value, MEMORY_UNIT_LEN);
         } else if (strcmp(name, "memory_unit_size") == 0) {
 	    config->memory_unit_size = (value != NULL) ? atol(value) : 1024 * 1024;
+        } else if (strcmp(name, "available_storage") == 0) {
+            config->display_available_storage = (value != NULL) ? atoi(value) : 1;
+        } else {
+            return 0;  /* unknown section/name, error */
         }
+
     }
 
     return 1;

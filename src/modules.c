@@ -1,3 +1,4 @@
+#include <sys/statvfs.h>
 #include "cupidfetch.h"
 
 void get_hostname() {
@@ -430,6 +431,36 @@ void get_available_memory() {
 	    g_userConfig.memory_unit,
 	    mem_total * 1024 / g_userConfig.memory_unit_size,
         g_userConfig.memory_unit
+    );
+}
+
+// storage module
+void get_available_storage() {
+    struct statvfs stat;
+    if (statvfs("/", &stat) != 0) {
+        fprintf(stderr, "Error getting available storage\n");
+        exit(EXIT_FAILURE);
+    }
+
+    unsigned long long available = stat.f_bavail * stat.f_frsize;
+    unsigned long long total = stat.f_blocks * stat.f_frsize;
+
+    // Use the storage unit from the config
+    const char* storage_unit = g_userConfig.storage_unit;
+
+    // Convert bytes to gigabytes if the storage unit is GB
+    double available_size = (double)available;
+    double total_size = (double)total;
+
+    if (strcmp(storage_unit, "GB") == 0) {
+        available_size /= (1024 * 1024 * 1024);
+        total_size /= (1024 * 1024 * 1024);
+    }
+
+    print_info(
+            "Storage", "%.2f %s / %.2f %s", 20, 30,
+            available_size, storage_unit,
+            total_size, storage_unit
     );
 }
 
