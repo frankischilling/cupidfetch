@@ -1,5 +1,5 @@
 CUPID_LIBS=-Ilibs
-CUPID_DEV=-Wall -pedantic
+CUPID_DEV=-Wall -pedantic --std=c99 -D_POSIX_C_SOURCE=200112L -D_DEFAULT_SOURCE
 
 all: clean cupidfetch
 
