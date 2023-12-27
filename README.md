@@ -84,6 +84,7 @@ sudo apt install git
 ```
 
 ## inih C Parser
+*We are working on implenting our own parser [kupidini](https://github.com/arthurbacci/kupidini)*
 
 The inih C parser can be integrated into your project either by manually downloading the source files from the [inih GitHub repository](https://github.com/benhoyt/inih) or by using a package manager if available.
 
@@ -120,6 +121,7 @@ local_ip = 1
 available_memory = 1
 memory_unit = MiB
 memory_unit_size = 1048576
+available_storage = 1
 ```
 
 ### Display Options
@@ -136,6 +138,7 @@ memory_unit_size = 1048576
 - `available_memory`: Display available memory information.
 - `memory_unit`: String representation of the unit used for the displaying of the RAM usage
 - `memory_unit_size`: Value in bytes of the forementioned unit
+- `available_storage`: Display available storage information.
 
 To customize the displayed information, set the corresponding option to `1` to enable or `0` to disable.
 
@@ -178,5 +181,3 @@ This project is a work-in-progress for learning and experimentation.
 ## License
 
 [GNU General Public License 2.0 or later](https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html)
-
-
