@@ -27,6 +27,7 @@ cupidfetch is a system information retrieval tool written in C for Linux systems
 * Desktop environment
 * Username
 * Memory
+* Storage
 
 **⬜ Enhance visual representation (soon):**
 
@@ -163,6 +164,7 @@ Welcome everyone! All skill levels can contribute:
 * **[X]** Implement a solid function to detect a large amount of distros
 * **[X]** Add memory info
 * **[X]** Add storage info
+* **[ ]** Add support for multiple drives 
 * **[X]** Fix terminal info, DE, and WM info and include more support
 * **[ ]** Make install 
 * **[X]** Config system using INI files with [inih C parser](https://github.com/benhoyt/inih) (done, pushing soon)
