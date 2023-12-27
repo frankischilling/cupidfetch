@@ -162,8 +162,8 @@ Welcome everyone! All skill levels can contribute:
 * **[ ]** Create and use a function that will get the geometry for each terminal so we aren't hard coding values
 * **[X]** Implement a solid function to detect a large amount of distros
 * **[X]** Add memory info
-* **[ ]** Add storage info
-* **[ ]** Fix terminal info, DE, and WM info and include more support
+* **[X]** Add storage info
+* **[X]** Fix terminal info, DE, and WM info and include more support
 * **[ ]** Make install 
 * **[X]** Config system using INI files with [inih C parser](https://github.com/benhoyt/inih) (done, pushing soon)
 
