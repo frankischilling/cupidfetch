@@ -1,0 +1,85 @@
+/* Add your styles for the news page here */
+
+/* Common styles for elements */
+body {
+    font-family: Arial, sans-serif;
+    padding: 10px;
+    position: relative;
+    cursor: url('../img/cursor.cur'), auto;
+}
+h1 {
+    font-size: 40px;
+}
+h2, p {
+    font-size: 16px; /* Smaller font size for better readability */
+    margin-bottom: 10px;
+}
+
+/* Styles for the "News About Tony and the Archive" heading */
+h2 {
+    color: #333;
+    font-size: 24px; /* Larger font size for headings */
+    border-bottom: 2px solid #007BFF; /* Add an underlined style to headings */
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+}
+
+/* Styles for individual news posts */
+.news-post {
+    background-color: #f9f9f9; /* Light background color for posts */
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd; /* Add a border to separate posts */
+    border-radius: 5px;
+}
+
+/* Style for the Discord link container */
+#infoContainer {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+}
+
+#discordLogo {
+    width: 50px;
+    margin-right: 10px;
+}
+#discordLink,
+#aboutLink,
+#homeLink,
+#newsLink {
+    color: #333;
+    font-family: Arial, sans-serif;
+    text-decoration: none; /* Remove underlines from links */
+    transition: color 0.3s; /* Smooth color transition */
+}
+
+#discordLink:hover,
+#aboutLink:hover,
+#homeLink:hover,
+#newsLink:hover {
+    
+    color: #007BFF; /* Change text color on hover */
+    cursor: pointer; /* Change cursor on hover to indicate interactivity */
+}
+
+#titleLink {
+    font-size: 20px;
+    color: #333;
+    font-family: Arial, sans-serif;
+    text-decoration: none; /* Remove underlines from links */
+    transition: color 0.3s; /* Smooth color transition */
+}
+
+#titleLink:hover {
+    color: #007BFF; /* Change text color on hover */
+    cursor: pointer; /* Change cursor on hover to indicate interactivity */
+}
+
+#cashappLogo {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
