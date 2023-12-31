@@ -436,32 +436,47 @@ void get_available_memory() {
 
 // storage module
 void get_available_storage() {
-    struct statvfs stat;
-    if (statvfs("/", &stat) != 0) {
-        fprintf(stderr, "Error getting available storage\n");
+    FILE* mount_file = fopen("/proc/mounts", "r");
+    if (mount_file == NULL) {
+        fprintf(stderr, "Error getting mount points\n");
         exit(EXIT_FAILURE);
     }
 
-    unsigned long long available = stat.f_bavail * stat.f_frsize;
-    unsigned long long total = stat.f_blocks * stat.f_frsize;
+    printf("Storage Information:\n");
 
-    // Use the storage unit from the config
-    const char* storage_unit = g_userConfig.storage_unit;
+    char mount_point[256];
+    while (fscanf(mount_file, "%255s", mount_point) == 1) {
+        struct statvfs stat;
+        if (statvfs(mount_point, &stat) != 0) {
+            // Skip entries where storage information cannot be retrieved
+            fprintf(stderr, "Error getting storage information for %s\n", mount_point);
+            continue;
+        }
 
-    // Convert bytes to gigabytes if the storage unit is GB
-    double available_size = (double)available;
-    double total_size = (double)total;
+        unsigned long long available = stat.f_bavail * stat.f_frsize;
+        unsigned long long total = stat.f_blocks * stat.f_frsize;
 
-    if (strcmp(storage_unit, "GB") == 0) {
-        available_size /= (1024 * 1024 * 1024);
-        total_size /= (1024 * 1024 * 1024);
+        // Use the storage unit from the config
+        const char* storage_unit = g_userConfig.storage_unit;
+
+        // Convert bytes to gigabytes if the storage unit is GB
+        double available_size = (double)available;
+        double total_size = (double)total;
+
+        if (strcmp(storage_unit, "GB") == 0) {
+            available_size /= (1024 * 1024 * 1024);
+            total_size /= (1024 * 1024 * 1024);
+        }
+
+        print_info(
+                "Storage",
+                "%s: %.2f %s / %.2f %s",
+                20, 30,
+                mount_point, available_size, storage_unit, total_size, storage_unit
+        );
     }
 
-    print_info(
-            "Storage", "%.2f %s / %.2f %s", 20, 30,
-            available_size, storage_unit,
-            total_size, storage_unit
-    );
+    fclose(mount_file);
 }
 
 const char* get_home_directory() {
