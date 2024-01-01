@@ -458,11 +458,9 @@ void get_available_storage() {
 
         if (total == 0) continue;
 
-    printf("%lu\n", g_userConfig.storage_unit);
-
         print_info(
                 first ? "Storage Information" : "",
-                "%s: %.2f %lu / %.2f %lu",
+                "%s: %lu %s / %lu %s",
                 20, 30,
                 mount_point, available, g_userConfig.storage_unit,
                 total, g_userConfig.storage_unit

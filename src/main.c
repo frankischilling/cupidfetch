@@ -136,27 +136,27 @@ int main() {
 
     if (!isatty(STDIN_FILENO)) {
         parse_result = ini_parse_file(stdin, cupid_ini_handler, &g_userConfig);
-        goto CONFIGURED;
+    } else {
+        const char* home = get_home_directory();
+
+        // Construct the path for the config file
+        char config_path[256];
+        snprintf(config_path, sizeof(config_path), "%s/.config/cupidfetch/cupidfetch.ini", home);
+
+	// In case the config file doesn't exist, create one
+        if (access(config_path, F_OK) == -1)
+            create_default_config(config_path, &g_userConfig);
+
+        // Load configuration from the file
+        parse_result = ini_parse(config_path, cupid_ini_handler, &g_userConfig);
     }
 
-    // Why is obvious stuff commented but the confusing parts are not?
-    // Determine the home directory of the current user
-    const char* home = get_home_directory();
 
-    // Construct the path for the config file
-    char config_path[256];
-    snprintf(config_path, sizeof(config_path), "%s/.config/cupidfetch/cupidfetch.ini", home);
-
-    // Config file exists, load configuration from the file
-    parse_result = ini_parse(config_path, cupid_ini_handler, &g_userConfig);
-
-CONFIGURED:
-
-
-    if (parse_result < 0) {
+    // It's fine not to stop the program, it will just run w/ the default
+    // config
+    if (parse_result < 0)
         fprintf(stderr, "Error parsing INI file: %s\n", strerror(parse_result));
-        exit(EXIT_FAILURE);
-    }
+
 
     display_fetch();
 
