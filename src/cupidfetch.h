@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <sys/utsname.h>
 #include <unistd.h>
@@ -40,6 +41,7 @@ struct CupidConfig {
     unsigned long memory_unit_size;
     int display_available_storage;
     char storage_unit[MEMORY_UNIT_LEN];
+    unsigned long storage_unit_size;
 };
 
 // print.c

@@ -17,10 +17,11 @@ void init_g_config() {
         .display_window_manager = 1,
         .display_local_ip = 1,
         .display_available_memory = 1,
-	    .memory_unit = "MiB",
+        .memory_unit = "MiB",
         .memory_unit_size = 1024 * 1024,
         .display_available_storage = 1,
-        .storage_unit = "GB",
+        .storage_unit = "GiB",
+        .storage_unit_size = 1024 * 1024 * 1024,
     };
     g_userConfig = cfg_;
 }
@@ -49,6 +50,7 @@ void create_default_config(const char* config_path, const struct CupidConfig* de
     fprintf(config_file, "memory_unit_size = %lu\n", default_config->memory_unit_size);
     fprintf(config_file, "available_storage =  %d\n", default_config->display_available_storage);
     fprintf(config_file, "storage_unit = %s\n", default_config->storage_unit);
+    fprintf(config_file, "storage_unit_size = %lu\n", default_config->storage_unit_size);
 
     fclose(config_file);
 }
@@ -89,6 +91,10 @@ int cupid_ini_handler(void* user, const char* section, const char* name, const c
 	    config->memory_unit_size = (value != NULL) ? atol(value) : 1024 * 1024;
         } else if (strcmp(name, "available_storage") == 0) {
             config->display_available_storage = (value != NULL) ? atoi(value) : 1;
+        } else if (strcmp(name, "storage_unit") == 0) {
+	    if (value) strncpy(config->storage_unit, value, MEMORY_UNIT_LEN);
+        } else if (strcmp(name, "storage_unit_size") == 0) {
+	    config->storage_unit_size = (value != NULL) ? atol(value) : 1024 * 1024;
         } else {
             return 0;  /* unknown section/name, error */
         }

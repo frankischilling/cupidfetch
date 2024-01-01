@@ -426,10 +426,10 @@ void get_available_memory() {
     }
 
     print_info(
-            "Memory", "%ld %s / %ld %s", 20, 30,
-            mem_used * 1024 / g_userConfig.memory_unit_size,
-	    g_userConfig.memory_unit,
-	    mem_total * 1024 / g_userConfig.memory_unit_size,
+        "Memory", "%ld %s / %ld %s", 20, 30,
+        mem_used * 1024 / g_userConfig.memory_unit_size,
+        g_userConfig.memory_unit,
+        mem_total * 1024 / g_userConfig.memory_unit_size,
         g_userConfig.memory_unit
     );
 }
@@ -442,38 +442,32 @@ void get_available_storage() {
         exit(EXIT_FAILURE);
     }
 
-    printf("Storage Information:\n");
 
+    bool first = 1;
     char mount_point[256];
     while (fscanf(mount_file, "%255s", mount_point) == 1) {
         struct statvfs stat;
+
         if (statvfs(mount_point, &stat) != 0) {
             // Skip entries where storage information cannot be retrieved
-            fprintf(stderr, "Error getting storage information for %s\n", mount_point);
             continue;
         }
 
-        unsigned long long available = stat.f_bavail * stat.f_frsize;
-        unsigned long long total = stat.f_blocks * stat.f_frsize;
+        unsigned long available = stat.f_bavail * stat.f_frsize / g_userConfig.storage_unit_size;
+        unsigned long total = stat.f_blocks * stat.f_frsize / g_userConfig.storage_unit_size;
 
-        // Use the storage unit from the config
-        const char* storage_unit = g_userConfig.storage_unit;
+        if (total == 0) continue;
 
-        // Convert bytes to gigabytes if the storage unit is GB
-        double available_size = (double)available;
-        double total_size = (double)total;
-
-        if (strcmp(storage_unit, "GB") == 0) {
-            available_size /= (1024 * 1024 * 1024);
-            total_size /= (1024 * 1024 * 1024);
-        }
+    printf("%lu\n", g_userConfig.storage_unit);
 
         print_info(
-                "Storage",
-                "%s: %.2f %s / %.2f %s",
+                first ? "Storage Information" : "",
+                "%s: %.2f %lu / %.2f %lu",
                 20, 30,
-                mount_point, available_size, storage_unit, total_size, storage_unit
+                mount_point, available, g_userConfig.storage_unit,
+                total, g_userConfig.storage_unit
         );
+        first = 0;
     }
 
     fclose(mount_file);

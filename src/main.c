@@ -158,7 +158,6 @@ CONFIGURED:
         exit(EXIT_FAILURE);
     }
 
-
     display_fetch();
 
     return 0;
