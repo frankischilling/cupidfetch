@@ -122,7 +122,8 @@ void display_fetch() {
     if (g_userConfig.display_uptime)              get_uptime();
     if (g_userConfig.display_package_count)       get_package_count(detectedDistro);
     if (g_userConfig.display_shell)               get_shell();
-    if (g_userConfig.display_terminal)            print_info("Terminal", "%s", 20, 30, get_terminal());
+    if (g_userConfig.display_terminal)            get_terminal();
+    // FIXME: wheres window manager?
     if (g_userConfig.display_desktop_environment) get_desktop_environment();
     if (g_userConfig.display_local_ip)            get_local_ip();
     if (g_userConfig.display_available_memory)    get_available_memory();

@@ -14,33 +14,24 @@ void get_username() {
     char* username = getlogin();
     if (username != NULL) {
         print_info("Username", username, 20, 30);
-    } else {
-        printf("Error fetching username\n");
     }
 }
 
 void get_linux_kernel() {
     struct utsname uname_data;
-    if (uname(&uname_data) != 0) {
-        fprintf(stderr, "Error getting Linux kernel information\n");
-        exit(EXIT_FAILURE);
-    }
+
+    if (uname(&uname_data) != 0) return;
 
     print_info("Linux Kernel", uname_data.release, 20, 30);
 }
 
 void get_uptime() {
     FILE* uptime_file = fopen("/proc/uptime", "r");
-    if (uptime_file == NULL) {
-        fprintf(stderr, "Error fetching uptime\n");
-        exit(EXIT_FAILURE);
-    }
+    if (uptime_file == NULL) return;
 
     double uptime;
-    if (fscanf(uptime_file, "%lf", &uptime) != 1) {
-        fprintf(stderr, "Error reading uptime\n");
-        exit(EXIT_FAILURE);
-    }
+    if (fscanf(uptime_file, "%lf", &uptime) != 1) return;
+
     fclose(uptime_file);
 
     int days = (int)uptime / (60 * 60 * 24);
@@ -103,24 +94,17 @@ void get_package_count(const char* distro) {
         }
     }
 
-    if (package_command == NULL) {
-        printf("Error: Unsupported distribution '%s'\n", distro);
-        return; // Return without running the command
-    }
+    if (package_command == NULL) return;
 
     // Run the package command and display the result
     FILE* fp = popen(package_command, "r");
-    if (fp == NULL) {
-        printf("Failed to run command\n");
-        exit(EXIT_FAILURE);
-    }
+    if (fp == NULL) return;
 
     char output[100];
     if (fgets(output, sizeof(output), fp) != NULL) {
-        output[strcspn(output, "\n")] = 0; // Remove newline character if present
-        print_info("Package Count", "%s", 20, 30, output); // Corrected usage
-    } else {
-        printf("Error reading package count\n");
+        // Remove everything but the first line (if there are other lines)
+        output[strcspn(output, "\n")] = 0;
+        print_info("Package Count", "%s", 20, 30, output);
     }
 
     pclose(fp);
@@ -128,47 +112,32 @@ void get_package_count(const char* distro) {
 
 void get_shell() {
     uid_t uid = geteuid();
+
     struct passwd *pw = getpwuid(uid);
+    if (pw == NULL) return;
 
-    if (pw != NULL) {
-        // Extract the shell from the password file entry
-        const char *shell = pw->pw_shell;
+    // Extract the shell from the password file entry
+    const char *shell = pw->pw_shell;
+    if (shell == NULL) return;
 
-        if (shell != NULL) {
-            // Extract the base name of the shell
-            const char *baseName = strrchr(shell, '/');
-            baseName = (baseName != NULL) ? baseName + 1 : shell;
+    // Extract the base name of the shell
+    const char *baseName = strrchr(shell, '/');
+    baseName = (baseName != NULL) ? baseName + 1 : shell;
 
-            print_info("Shell", baseName, 20, 30);
-            return;
-        }
-    }
-
-    // Fallback: Print unknown if shell cannot be determined
-    print_info("Shell", "Unknown", 20, 30);
+    print_info("Shell", baseName, 20, 30);
 }
 
-const char* get_terminal() {
-    const char* term_program = getenv("TERM");
+void get_terminal() {
+    if (!isatty(STDOUT_FILENO)) return;
 
-    if (term_program != NULL) {
-        // Get the terminal type from the TERM environment variable
-        return term_program;
-    } else {
-        if (isatty(STDOUT_FILENO)) {
-            // Check if stdout is a terminal
-            struct winsize w;
-            if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == 0) {
-                return "Unknown (Interactive)";
-            } else {
-                return "Unknown (Non-Interactive)";
-            }
-        } else {
-            return "Not a terminal";
-        }
-    }
+    const char *term_program = getenv("TERM");
+    if (term_program == NULL) return;
+
+    print_info("Terminal", "%s", 20, 30, term_program);
 }
 
+// FIXME: dead code
+/*
 void get_window_manager() {
     // Only get window managers, not desktop environments
     // Same logic as get_desktop_environment() but only looking or WMs
@@ -177,10 +146,7 @@ void get_window_manager() {
     struct dirent *entry;
 
     dir = opendir("/proc");
-    if (dir == NULL) {
-        perror("Error opening /proc directory");
-        return;
-    }
+    if (dir == NULL) return;
 
     int wmFound = 0;  // Flag to indicate if a window manager has been found
 
@@ -193,6 +159,7 @@ void get_window_manager() {
             if (cmdlineFile != NULL) {
                 char cmdline[270];
                 if (fgets(cmdline, sizeof(cmdline), cmdlineFile) != NULL) {
+                    // FIXME: hardcoded names
 
                     // Example: Check if "fvwm" is in the cmdline
                     if (strstr(cmdline, "fvwm") != NULL) {
@@ -245,9 +212,10 @@ void get_window_manager() {
         //print_info("WM", "Unknown", 20, 30);
     }
 }
+*/
 
 void get_desktop_environment() {
-    // Try to get desktop environment using $XDG_CURRENT_DESKTOP
+
     const char* xdgDesktop = getenv("XDG_CURRENT_DESKTOP");
     if (xdgDesktop != NULL && strlen(xdgDesktop) > 0) {
         print_info("DE", xdgDesktop, 20, 30);
@@ -255,6 +223,7 @@ void get_desktop_environment() {
     }
 
     // If $XDG_CURRENT_DESKTOP is empty or not found, try checking processes
+    // NOTE: hardcoded :(
 
     DIR *dir;
     struct dirent *entry;
@@ -264,8 +233,6 @@ void get_desktop_environment() {
         perror("Error opening /proc directory");
         return;
     }
-
-    int desktopFound = 0;  // Flag to indicate if a desktop environment has been found
 
     while ((entry = readdir(dir)) != NULL) {
         if (entry->d_type == DT_DIR) {
@@ -280,38 +247,32 @@ void get_desktop_environment() {
                     // Example: Check if "gnome-shell" is in the cmdline
                     if (strstr(cmdline, "gnome-shell") != NULL) {
                         print_info("DE", "GNOME", 20, 30);
-                        desktopFound = 1;
                         break;
                     }
 
                     // Example: Check if "plasma-desktop" is in the cmdline
                     if (strstr(cmdline, "plasma-desktop") != NULL) {
                         print_info("DE", "KDE Plasma", 20, 30);
-                        desktopFound = 1;
                         break;
                     }
 
                     if (strstr(cmdline, "xfce4-session") != NULL) {
                         print_info("DE", "XFCE", 20, 30);
-                        desktopFound = 1;
                         break;
                     }
 
                     if (strstr(cmdline, "mate-session") != NULL) {
                         print_info("DE", "MATE", 20, 30);
-                        desktopFound = 1;
                         break;
                     }
 
                     if (strstr(cmdline, "lxqt-session") != NULL) {
                         print_info("DE", "LXQt", 20, 30);
-                        desktopFound = 1;
                         break;
                     }
 
                     if (strstr(cmdline, "lxde-session") != NULL) {
                         print_info("DE", "LXDE", 20, 30);
-                        desktopFound = 1;
                         break;
                     }
 
@@ -324,32 +285,27 @@ void get_desktop_environment() {
 
     closedir(dir);
 
-    // If no desktop environment is detected, print nothing since we dont want to display anything
-    if (!desktopFound) {
+    // This can just be removed ig idk
+    if (entry == NULL) {
         //print_info("DE", "Unknown", 20, 30);
     }
 }
 
+// haha got ur ip
 void get_local_ip() {
     struct ifaddrs *ifaddr, *ifa;
-    if (getifaddrs(&ifaddr) == -1) {
-        printf("Error retrieving IP address.\n");
-        return;
-    }
+    if (getifaddrs(&ifaddr) == -1) return;
+
     for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
         if (ifa->ifa_addr != NULL && ifa->ifa_addr->sa_family == AF_INET) {
             struct sockaddr_in *addr = (struct sockaddr_in *)ifa->ifa_addr;
             char ip_addr[16]; // Allocate enough space for an IPv6 address
             snprintf(ip_addr, sizeof(ip_addr), "%s", inet_ntoa(addr->sin_addr));
 
-            // Check if loopback interface and skip if needed
-            if (strcmp(ifa->ifa_name, "lo") == 0) {
-                continue;
-            }
-
-            // Print with dynamic padding for right alignment
-            print_info("Local IP", "%s", 20, 30, ip_addr);
-            break;
+            if (0 != strcmp(ifa->ifa_name, "lo")) {
+                print_info("Local IP", "%s", 20, 30, ip_addr);
+                break;
+	    }
         }
     }
 
@@ -360,6 +316,7 @@ void get_available_memory() {
     // Linux-specific implementation
     // Source: https://github.com/KittyKatt/screenFetch/issues/386#issuecomment-249312716
     // Also used in neofetch
+    
     ssize_t mem_avail = -1, mem_total = -1;
     long mem_used = 0;
     FILE* meminfo;
@@ -367,10 +324,7 @@ void get_available_memory() {
 
     meminfo = fopen("/proc/meminfo", "r");
 
-    if (meminfo == NULL) {
-        fprintf(stderr, "Error: Failed to open /proc/meminfo\n");
-        return;
-    }
+    if (meminfo == NULL) return;
 
     while (fgets(line, sizeof line, meminfo)) {
         char *value = NULL;
@@ -416,10 +370,7 @@ void get_available_memory() {
 
     fclose(meminfo);
 
-    if (mem_total == -1) {
-        fprintf(stderr, "Error: Failed to retrieve total memory.\n");
-        return;
-    }
+    if (mem_total == -1) return;
 
     if (mem_avail != -1) {
         mem_used = mem_total - mem_avail;
@@ -434,13 +385,9 @@ void get_available_memory() {
     );
 }
 
-// storage module
 void get_available_storage() {
     FILE* mount_file = fopen("/proc/mounts", "r");
-    if (mount_file == NULL) {
-        fprintf(stderr, "Error getting mount points\n");
-        exit(EXIT_FAILURE);
-    }
+    if (mount_file == NULL) return;
 
 
     bool first = 1;
@@ -475,9 +422,11 @@ const char* get_home_directory() {
     const char* homeDir;
     if ((homeDir = getenv("HOME")) == NULL) {
         struct passwd* pw = getpwuid(getuid());
-        if (pw != NULL) {
-            homeDir = pw->pw_dir;
-        }
+        if (pw == NULL) {
+	    fprintf(stderr, "home directory couldn't be found sir\n");
+	    exit(EXIT_FAILURE);
+	}
+        homeDir = pw->pw_dir;
     }
     return homeDir;
 }

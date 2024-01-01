@@ -57,9 +57,9 @@ void get_linux_kernel();
 void get_uptime();
 void get_package_count(const char* distro);
 void get_shell();
-const char* get_terminal();
+void get_terminal();
 void get_desktop_environment();
-void get_window_manager();
+/* void get_window_manager(); */
 void get_local_ip();
 void get_available_memory();
 void get_available_storage();
