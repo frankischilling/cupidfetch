@@ -419,7 +419,11 @@ void get_available_storage() {
 }
 
 const char* get_home_directory() {
-    const char* homeDir;
+    static char *homeDir = NULL;
+
+    // It may be fine to memoize
+    if (homeDir != NULL) return homeDir;
+
     if ((homeDir = getenv("HOME")) == NULL) {
         struct passwd* pw = getpwuid(getuid());
         if (pw == NULL) {

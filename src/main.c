@@ -130,6 +130,24 @@ void display_fetch() {
     if (g_userConfig.display_available_storage)   get_available_storage();
 }
 
+void create_cupidfetch_dir() {
+	char config_path[CONFIG_PATH_SIZE];
+	const char* home = get_home_directory();
+
+	snprintf(config_path, sizeof(config_path), "%s/.config/cupidfetch", home);
+	if (access(config_path, F_OK) == -1) {
+		if (mkdir(config_path, 0777) != -1) return;
+
+		fprintf(stderr, "Couldn't create .config/cupidfetch/ %d\n", errno);
+
+		snprintf(config_path, sizeof(config_path), "%s/.config", home);
+		if (access(config_path, F_OK) == -1) {
+			fprintf(stderr, "Please hardcode your .config in the source code\n");
+			exit(EXIT_FAILURE);
+		}
+	}
+}
+
 int main() {
     int parse_result = 0;
 
@@ -138,15 +156,17 @@ int main() {
     if (!isatty(STDIN_FILENO)) {
         parse_result = ini_parse_file(stdin, cupid_ini_handler, &g_userConfig);
     } else {
-        const char* home = get_home_directory();
+        create_cupidfetch_dir();
+	
+	const char* home = get_home_directory();
 
         // Construct the path for the config file
-        char config_path[256];
-        snprintf(config_path, sizeof(config_path), "%s/.config/cupidfetch/cupidfetch.ini", home);
+        char config_path[CONFIG_PATH_SIZE];
+	snprintf(config_path, sizeof(config_path), "%s/.config/cupidfetch/cupidfetch.ini", home);
 
 	// In case the config file doesn't exist, create one
-        if (access(config_path, F_OK) == -1)
-            create_default_config(config_path, &g_userConfig);
+	if (access(config_path, F_OK) == -1)
+		create_default_config(config_path, &g_userConfig);
 
         // Load configuration from the file
         parse_result = ini_parse(config_path, cupid_ini_handler, &g_userConfig);

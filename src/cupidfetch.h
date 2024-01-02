@@ -3,24 +3,27 @@
 #ifndef CUPIDFETCH_H
 #define CUPIDFETCH_H
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <arpa/inet.h>
+#include <ctype.h>
+#include <dirent.h>
+#include <errno.h>
+#include <ifaddrs.h>
+#include <pwd.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/utsname.h>
 #include <unistd.h>
-#include <ifaddrs.h>
-#include <errno.h>
-#include <arpa/inet.h>
-#include <sys/ioctl.h>
-#include <pwd.h>
-#include <sys/stat.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <dirent.h>
+
 // Inih
 #include <ini.h>
 
+#define CONFIG_PATH_SIZE 256
 #define LINUX_PROC_LINE_SZ 128
 #define MEMORY_UNIT_LEN 128
 
