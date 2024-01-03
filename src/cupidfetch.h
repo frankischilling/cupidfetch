@@ -50,7 +50,8 @@ struct CupidConfig {
 typedef enum {
 	LogType_INFO = 0,
 	LogType_WARNING = 1,
-	LogType_ERROR = 2
+	LogType_ERROR = 2,
+	LogType_CRITICAL = 3
 } LogType;
 
 // print.c
@@ -86,6 +87,7 @@ void cupid_log(LogType ltp, const char *format, ...);
 
 // main.c
 extern FILE *g_log;
+void epitaph();
 
 
 #endif

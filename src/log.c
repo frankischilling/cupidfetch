@@ -1,7 +1,7 @@
 #include "cupidfetch.h"
 
 
-const char *log_types[3] = {"INFO", "WARNING", "ERROR"};
+const char *log_types[] = {"INFO", "WARNING", "ERROR", "CRITICAL"};
 
 void cupid_log(LogType ltp, const char *format, ...) {
     va_list args;
@@ -12,5 +12,10 @@ void cupid_log(LogType ltp, const char *format, ...) {
     fprintf(g_log, ">\n");
 
     va_end(args);
+
+    if (ltp == LogType_CRITICAL) {
+	epitaph();
+	exit(EXIT_FAILURE);
+    }
 }
 

@@ -189,7 +189,10 @@ int main() {
 
     display_fetch();
 
-    if (g_log != stderr) fclose(g_log);
-
+    epitaph();
     return 0;
+}
+
+void epitaph() {
+    if (g_log != stderr) fclose(g_log);
 }
