@@ -47,6 +47,12 @@ struct CupidConfig {
     unsigned long storage_unit_size;
 };
 
+typedef enum {
+	LogType_INFO = 0,
+	LogType_WARNING = 1,
+	LogType_ERROR = 2
+} LogType;
+
 // print.c
 int get_terminal_width();
 void print_info(const char *key, const char *format, int align_key, int align_value, ...);
@@ -74,6 +80,9 @@ extern struct CupidConfig g_userConfig;
 void init_g_config();
 void create_default_config(const char* config_path, const struct CupidConfig* default_config);
 int cupid_ini_handler(void* user, const char* section, const char* name, const char* value);
+
+// log.c
+void cupid_log(LogType ltp, const char *format, ...);
 
 // main.c
 extern FILE *g_log;
