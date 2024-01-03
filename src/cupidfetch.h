@@ -3,24 +3,27 @@
 #ifndef CUPIDFETCH_H
 #define CUPIDFETCH_H
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <arpa/inet.h>
+#include <ctype.h>
+#include <dirent.h>
+#include <errno.h>
+#include <ifaddrs.h>
+#include <pwd.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/utsname.h>
 #include <unistd.h>
-#include <ifaddrs.h>
-#include <errno.h>
-#include <arpa/inet.h>
-#include <sys/ioctl.h>
-#include <pwd.h>
-#include <sys/stat.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <dirent.h>
+
 // Inih
 #include <ini.h>
 
+#define CONFIG_PATH_SIZE 256
 #define LINUX_PROC_LINE_SZ 128
 #define MEMORY_UNIT_LEN 128
 
@@ -43,6 +46,13 @@ struct CupidConfig {
     char storage_unit[MEMORY_UNIT_LEN];
     unsigned long storage_unit_size;
 };
+
+typedef enum {
+	LogType_INFO = 0,
+	LogType_WARNING = 1,
+	LogType_ERROR = 2,
+	LogType_CRITICAL = 3
+} LogType;
 
 // print.c
 int get_terminal_width();
@@ -71,5 +81,13 @@ extern struct CupidConfig g_userConfig;
 void init_g_config();
 void create_default_config(const char* config_path, const struct CupidConfig* default_config);
 int cupid_ini_handler(void* user, const char* section, const char* name, const char* value);
+
+// log.c
+void cupid_log(LogType ltp, const char *format, ...);
+
+// main.c
+extern FILE *g_log;
+void epitaph();
+
 
 #endif

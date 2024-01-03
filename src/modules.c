@@ -3,10 +3,9 @@
 
 void get_hostname() {
     char hostname[256];
-    if (gethostname(hostname, sizeof(hostname)) != 0) {
-        fprintf(stderr, "Error getting hostname\n");
-        exit(EXIT_FAILURE);
-    }
+    if (gethostname(hostname, sizeof(hostname)) != 0)
+    	cupid_log(LogType_CRITICAL, "couldn't get hostname");
+
     print_info("Hostname", hostname, 20, 30);
 }
 
@@ -20,17 +19,23 @@ void get_username() {
 void get_linux_kernel() {
     struct utsname uname_data;
 
-    if (uname(&uname_data) != 0) return;
+    if (uname(&uname_data) != 0) {
+    	cupid_log(LogType_ERROR, "couldn't get uname data");
+        return;
+    }
 
     print_info("Linux Kernel", uname_data.release, 20, 30);
 }
 
 void get_uptime() {
     FILE* uptime_file = fopen("/proc/uptime", "r");
-    if (uptime_file == NULL) return;
+    if (uptime_file == NULL) {
+        cupid_log(LogType_ERROR, "couldn't open /proc/uptime");
+        return;
+    }
 
     double uptime;
-    if (fscanf(uptime_file, "%lf", &uptime) != 1) return;
+    if (fscanf(uptime_file, "%lf", &uptime) != 1) return; // TODO: log
 
     fclose(uptime_file);
 
@@ -98,7 +103,7 @@ void get_package_count(const char* distro) {
 
     // Run the package command and display the result
     FILE* fp = popen(package_command, "r");
-    if (fp == NULL) return;
+    if (fp == NULL) return; // TODO: log
 
     char output[100];
     if (fgets(output, sizeof(output), fp) != NULL) {
@@ -114,11 +119,11 @@ void get_shell() {
     uid_t uid = geteuid();
 
     struct passwd *pw = getpwuid(uid);
-    if (pw == NULL) return;
+    if (pw == NULL) return; // TODO: log
 
     // Extract the shell from the password file entry
     const char *shell = pw->pw_shell;
-    if (shell == NULL) return;
+    if (shell == NULL) return; // TODO: log
 
     // Extract the base name of the shell
     const char *baseName = strrchr(shell, '/');
@@ -128,10 +133,10 @@ void get_shell() {
 }
 
 void get_terminal() {
-    if (!isatty(STDOUT_FILENO)) return;
+    if (!isatty(STDOUT_FILENO)) return; // TODO: log
 
     const char *term_program = getenv("TERM");
-    if (term_program == NULL) return;
+    if (term_program == NULL) return; // TODO: log
 
     print_info("Terminal", "%s", 20, 30, term_program);
 }
@@ -230,7 +235,7 @@ void get_desktop_environment() {
 
     dir = opendir("/proc");
     if (dir == NULL) {
-        perror("Error opening /proc directory");
+ // TODO: log
         return;
     }
 
@@ -286,7 +291,7 @@ void get_desktop_environment() {
     closedir(dir);
 
     // This can just be removed ig idk
-    if (entry == NULL) {
+    if (entry == NULL) { // TODO: log
         //print_info("DE", "Unknown", 20, 30);
     }
 }
@@ -308,7 +313,7 @@ void get_local_ip() {
 	    }
         }
     }
-
+ // TODO: log
     freeifaddrs(ifaddr);
 }
 
@@ -370,7 +375,7 @@ void get_available_memory() {
 
     fclose(meminfo);
 
-    if (mem_total == -1) return;
+    if (mem_total == -1) return; // TODO: log
 
     if (mem_avail != -1) {
         mem_used = mem_total - mem_avail;
@@ -397,6 +402,7 @@ void get_available_storage() {
 
         if (statvfs(mount_point, &stat) != 0) {
             // Skip entries where storage information cannot be retrieved
+	    cupid_log(LogType_INFO, "nothing for %s", mount_point);
             continue;
         }
 
@@ -419,7 +425,11 @@ void get_available_storage() {
 }
 
 const char* get_home_directory() {
-    const char* homeDir;
+    static char *homeDir = NULL;
+
+    // It may be fine to memoize
+    if (homeDir != NULL) return homeDir;
+
     if ((homeDir = getenv("HOME")) == NULL) {
         struct passwd* pw = getpwuid(getuid());
         if (pw == NULL) {
