@@ -1,5 +1,7 @@
 #include "cupidfetch.h"
 
+FILE *g_log = NULL;
+
 
 // Define a structure to hold distro information
 struct DistroInfo {
@@ -149,18 +151,21 @@ void create_cupidfetch_dir() {
 }
 
 int main() {
-    int parse_result = 0;
+    int parse_result = -69;
 
     init_g_config();
+    g_log = NULL;
 
-    if (!isatty(STDIN_FILENO)) {
+
+    if (!isatty(STDIN_FILENO))
         parse_result = ini_parse_file(stdin, cupid_ini_handler, &g_userConfig);
-    } else {
-        create_cupidfetch_dir();
+    if (!isatty(STDERR_FILENO))
+    	g_log = stderr;
 	
+    if (parse_result == -69 || g_log == NULL) {
+        create_cupidfetch_dir();
 	const char* home = get_home_directory();
 
-        // Construct the path for the config file
         char config_path[CONFIG_PATH_SIZE];
 	snprintf(config_path, sizeof(config_path), "%s/.config/cupidfetch/cupidfetch.ini", home);
 
@@ -170,6 +175,10 @@ int main() {
 
         // Load configuration from the file
         parse_result = ini_parse(config_path, cupid_ini_handler, &g_userConfig);
+
+	snprintf(config_path, sizeof(config_path), "%s/.config/cupidfetch/log.txt", home);
+
+	g_log = fopen(config_path, "w");
     }
 
 
@@ -178,8 +187,9 @@ int main() {
     if (parse_result < 0)
         fprintf(stderr, "Error parsing INI file: %s\n", strerror(parse_result));
 
-
     display_fetch();
+
+    if (g_log != stderr) fclose(g_log);
 
     return 0;
 }

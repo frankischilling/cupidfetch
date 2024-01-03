@@ -75,4 +75,8 @@ void init_g_config();
 void create_default_config(const char* config_path, const struct CupidConfig* default_config);
 int cupid_ini_handler(void* user, const char* section, const char* name, const char* value);
 
+// main.c
+extern FILE *g_log;
+
+
 #endif
