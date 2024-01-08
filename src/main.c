@@ -116,20 +116,9 @@ void display_fetch() {
     printf("\n");
     printf("-----------------------------------------\n");
 
-    // Display system information based on loaded or default user configuration
-    if (g_userConfig.display_host_name)           get_hostname();
-    if (g_userConfig.display_username)            get_username();
-    if (g_userConfig.display_distro)              print_info("Distro", detectedDistro, 20, 30);
-    if (g_userConfig.display_linux_kernel)        get_linux_kernel();
-    if (g_userConfig.display_uptime)              get_uptime();
-    if (g_userConfig.display_package_count)       get_package_count(detectedDistro);
-    if (g_userConfig.display_shell)               get_shell();
-    if (g_userConfig.display_terminal)            get_terminal();
-    // FIXME: wheres window manager?
-    if (g_userConfig.display_desktop_environment) get_desktop_environment();
-    if (g_userConfig.display_local_ip)            get_local_ip();
-    if (g_userConfig.display_available_memory)    get_available_memory();
-    if (g_userConfig.display_available_storage)   get_available_storage();
+    for (size_t i = 0; g_userConfig.modules[i]; i++) {
+        g_userConfig.modules[i]();
+    }
 }
 
 void create_cupidfetch_dir() {
