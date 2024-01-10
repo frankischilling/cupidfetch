@@ -102,41 +102,11 @@ The inih C parser can be integrated into your project either by manually downloa
 
 ## Configuration File
 
-The configuration file for `cupidfetch` is located at `~/.config/cupidfetch/cupidfetch.ini`. This file allows you to customize the displayed information by toggling options on or off. Below is an example of the configuration file:
+The configuration file for `cupidfetch` is located at `${XDG_CONFIG_HOME or $HOME/.config}/cupidfetch/cupidfetch.ini`. This file allows you to customize the displayed information by toggling options on or off. An example config is at the `data` directory of this repository. It includes some comments that may help you.
 
-```
-[DisplayOptions]
-host_name = 1
-username = 1
-distro = 1
-linux_kernel = 1
-uptime = 1
-package_count = 1
-shell = 1
-desktop_environment = 1
-window_manager = 1
-local_ip = 1
-available_memory = 1
-memory_unit = MiB
-memory_unit_size = 1048576
-```
+## Log File
 
-### Display Options
-
-- `host_name`: Display the host name.
-- `username`: Display the username.
-- `distro`: Display the Linux distribution.
-- `linux_kernel`: Display the Linux kernel version.
-- `uptime`: Display the system uptime.
-- `package_count`: Display the package count.
-- `shell`: Display the shell in use.
-- `desktop_environment`: Display the desktop environment.
-- `local_ip`: Display the local IP address.
-- `available_memory`: Display available memory information.
-- `memory_unit`: String representation of the unit used for the displaying of the RAM usage
-- `memory_unit_size`: Value in bytes of the forementioned unit
-
-To customize the displayed information, set the corresponding option to `1` to enable or `0` to disable.
+IF there's no log at `.../cupidfetch/log.txt`, it will output to the stderr. If you want to ignore it, please do `cupidfetch 2> /dev/null`.
 
 ## Requirements
 
