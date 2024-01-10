@@ -18,6 +18,7 @@ struct {
     {"shell", get_shell},
     {"desktop_environment", get_desktop_environment},
     {"de", get_desktop_environment},
+    /* TODO: window manager module reactivation */
     // {"window_manager", 
     {"local_ip", get_local_ip},
     {"ip", get_local_ip},
@@ -30,7 +31,12 @@ struct {
 
 void init_g_config() {
     struct CupidConfig cfg_ = {
-	.modules = {NULL},
+	.modules = { get_hostname, get_username, get_distro, get_linux_kernel
+	           , get_uptime, get_package_count, get_shell
+		   , get_desktop_environment, get_local_ip, get_available_memory
+		   , get_available_storage
+		   , NULL
+		   },
         .memory_unit = "MiB",
         .memory_unit_size = 1024 * 1024,
         .storage_unit = "GiB",
@@ -39,24 +45,6 @@ void init_g_config() {
     g_userConfig = cfg_;
 }
 
-
-void create_default_config(const char* config_path, const struct CupidConfig* default_config) {
-    FILE* config_file = fopen(config_path, "w");
-    if (config_file == NULL) {
-        fprintf(stderr, "Error creating config file: %s\n", config_path);
-        exit(EXIT_FAILURE);
-    }
-
-    fprintf(config_file, "[DisplayOptions]\n");
-    // FIXME: hardcoded
-    fprintf(config_file, "modules = host_name username distro linux_kernel uptime package_count shell desktop_environment local_ip available_memory available_storage\n");
-    fprintf(config_file, "memory_unit = %s\n", default_config->memory_unit);
-    fprintf(config_file, "memory_unit_size = %lu\n", default_config->memory_unit_size);
-    fprintf(config_file, "storage_unit = %s\n", default_config->storage_unit);
-    fprintf(config_file, "storage_unit_size = %lu\n", default_config->storage_unit_size);
-
-    fclose(config_file);
-}
 
 // INI handler function
 int cupid_ini_handler(void* user, const char* section, const char* name, const char* value) {
