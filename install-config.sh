@@ -12,14 +12,14 @@ else
 	then
 		config="$HOME/.config"
 	else
-		echo 'Please set your $HOME'
+		echo 'Please set your HOME'
 		exit 1
 	fi
 fi
 
 echo "Your config directory is $config"
 echo "Press enter to continue"
-read
+read -r discard
 
 if [ -f "${config}/cupidfetch" ]
 then
@@ -29,7 +29,7 @@ else
 	if [ ! -d "${config}/cupidfetch" ]
 	then
 		echo "mkdir ${config}/cupidfetch......"
-		mkdir ${config}/cupidfetch
+		mkdir "${config}/cupidfetch"
 	else
 		echo "Your ${config}/cupidfetch already exists"
 	fi
