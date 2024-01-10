@@ -15,6 +15,8 @@ asan: src/*.c libs/ini.c
 ubsan: src/*.c libs/ini.c
 	$(CC) -o cupidfetch $^ -fsanitize=undefined $(CUPID_DEV) $(CFLAGS) $(LDFLAGS) $(CUPID_LIBS) $(LIBS) $(LD_LIBS)
 
+.PHONY: clean
+
 clean:
 	rm -f cupidfetch *.o
 

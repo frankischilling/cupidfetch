@@ -47,13 +47,20 @@ void get_uptime() {
     print_info("Uptime", "%d days, %02d:%02d", 20, 30, days, hours, minutes);
 }
 
+void get_distro() {
+    // TODO: distro can be a global
+    const char *distro = detect_linux_distro();
+    print_info("Distro", distro, 20, 30);
+}
+
 struct DistroPackageInfo {
     const char* distro;
     const char* package_command;
 };
 
-void get_package_count(const char* distro) {
+void get_package_count() {
     const char* package_command = NULL;
+    const char* distro = detect_linux_distro();
 
     // List of supported distros and their package commands
     struct DistroPackageInfo supported_distros[] = {

@@ -116,38 +116,9 @@ void display_fetch() {
     printf("\n");
     printf("-----------------------------------------\n");
 
-    // Display system information based on loaded or default user configuration
-    if (g_userConfig.display_host_name)           get_hostname();
-    if (g_userConfig.display_username)            get_username();
-    if (g_userConfig.display_distro)              print_info("Distro", detectedDistro, 20, 30);
-    if (g_userConfig.display_linux_kernel)        get_linux_kernel();
-    if (g_userConfig.display_uptime)              get_uptime();
-    if (g_userConfig.display_package_count)       get_package_count(detectedDistro);
-    if (g_userConfig.display_shell)               get_shell();
-    if (g_userConfig.display_terminal)            get_terminal();
-    // FIXME: wheres window manager?
-    if (g_userConfig.display_desktop_environment) get_desktop_environment();
-    if (g_userConfig.display_local_ip)            get_local_ip();
-    if (g_userConfig.display_available_memory)    get_available_memory();
-    if (g_userConfig.display_available_storage)   get_available_storage();
-}
-
-void create_cupidfetch_dir() {
-	char config_path[CONFIG_PATH_SIZE];
-	const char* home = get_home_directory();
-
-	snprintf(config_path, sizeof(config_path), "%s/.config/cupidfetch", home);
-	if (access(config_path, F_OK) == -1) {
-		if (mkdir(config_path, 0777) != -1) return;
-
-		fprintf(stderr, "Couldn't create .config/cupidfetch/ %d\n", errno);
-
-		snprintf(config_path, sizeof(config_path), "%s/.config", home);
-		if (access(config_path, F_OK) == -1) {
-			fprintf(stderr, "Please hardcode your .config in the source code\n");
-			exit(EXIT_FAILURE);
-		}
-	}
+    for (size_t i = 0; g_userConfig.modules[i]; i++) {
+        g_userConfig.modules[i]();
+    }
 }
 
 int main() {
@@ -161,31 +132,57 @@ int main() {
         parse_result = ini_parse_file(stdin, cupid_ini_handler, &g_userConfig);
     if (!isatty(STDERR_FILENO))
     	g_log = stderr;
-	
-    if (parse_result == -69 || g_log == NULL) {
-        create_cupidfetch_dir();
-	const char* home = get_home_directory();
 
+    if (g_log == NULL) {
         char config_path[CONFIG_PATH_SIZE];
-	snprintf(config_path, sizeof(config_path), "%s/.config/cupidfetch/cupidfetch.ini", home);
 
-	// In case the config file doesn't exist, create one
-	if (access(config_path, F_OK) == -1)
-		create_default_config(config_path, &g_userConfig);
+	/*
+	 * $XDG_CONFIG_HOME defines the base directory relative to which
+	 * user-specific configuration files should be stored. If
+	 * $XDG_CONFIG_HOME is either not set or empty, a default equal to
+	 * $HOME/.config should be used.
+	 *
+	 * https://www.freedesktop.org/wiki/Specifications/basedir-spec/
+	 */
 
-        // Load configuration from the file
-        parse_result = ini_parse(config_path, cupid_ini_handler, &g_userConfig);
-
-	snprintf(config_path, sizeof(config_path), "%s/.config/cupidfetch/log.txt", home);
+	char *config = NULL;
+	if ((config = getenv("XDG_CONFIG_HOME"))) {
+		snprintf(config_path, sizeof(config_path), "%s/cupidfetch/log.txt", config);
+	} else {
+		const char* home = get_home_directory();
+		snprintf(config_path, sizeof(config_path), "%s/.config/cupidfetch/log.txt", home);
+	}
 
 	g_log = fopen(config_path, "w");
+	if (g_log == NULL) {
+	    g_log = stderr;
+	    cupid_log(LogType_ERROR, "Couldn't open config, logging to stderr");
+	}
+    }
+	
+    if (parse_result == -69) {
+        char config_path[CONFIG_PATH_SIZE];
+
+	char *config = NULL;
+	if ((config = getenv("XDG_CONFIG_HOME"))) {
+		snprintf(config_path, sizeof(config_path), "%s/cupidfetch/cupidfetch.ini", config);
+	} else {
+		const char* home = get_home_directory();
+		snprintf(config_path, sizeof(config_path), "%s/.config/cupidfetch/cupidfetch.ini", home);
+	}
+
+	if (access(config_path, F_OK) == -1)
+		cupid_log(LogType_ERROR, "Couldn't open %s", config_path);
+	else
+		parse_result = ini_parse(config_path, cupid_ini_handler, &g_userConfig);
+
     }
 
 
     // It's fine not to stop the program, it will just run w/ the default
     // config
     if (parse_result < 0)
-        fprintf(stderr, "Error parsing INI file: %s\n", strerror(parse_result));
+    	cupid_log(LogType_WARNING, "Running with default config");
 
     display_fetch();
 
