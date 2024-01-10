@@ -60,8 +60,6 @@ int cupid_ini_handler(void* user, const char* section, const char* name, const c
             char *module = strtok(v, " ");
 	    size_t mi = 0;
 	    while (module) {
-	        printf("(%s)\n", module);
-
 		for (size_t i = 0; i < sizeof(string_to_module) / sizeof(*string_to_module); i++) {
 		    if (strcmp(module, string_to_module[i].s) == 0) {
 		        if (mi + 1 >= MAX_NUM_MODULES) return 0;
