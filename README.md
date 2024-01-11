@@ -27,6 +27,7 @@ cupidfetch is a system information retrieval tool written in C for Linux systems
 * Desktop environment
 * Username
 * Memory
+* and others
 
 **⬜ Enhance visual representation (soon):**
 
@@ -42,11 +43,7 @@ cupidfetch is a system information retrieval tool written in C for Linux systems
 * Debian (Ubuntu, elementary, Mint) [Verified ✔️]
 * Arch (Manjaro, Artix, EndeavourOS) [Verified ✔️]
 * Fedora [Verified ✔️]
-* openSUSE
-* Gentoo
-* Void
-* NixOS
-* And more!
+* Others are in `data/distros.def` (feel free to add your)
 
 ## Dependencies
 
@@ -102,11 +99,13 @@ The inih C parser can be integrated into your project either by manually downloa
 
 ## Configuration File
 
+You can use the `install-config.sh` script to create cupidfetch the config. You can test some of the examples in `examples/` by running `cupidfetch < examples/example.ini`.
+
 The configuration file for `cupidfetch` is located at `${XDG_CONFIG_HOME or $HOME/.config}/cupidfetch/cupidfetch.ini`. This file allows you to customize the displayed information by toggling options on or off. An example config is at the `data` directory of this repository. It includes some comments that may help you.
 
 ## Log File
 
-IF there's no log at `.../cupidfetch/log.txt`, it will output to the stderr. If you want to ignore it, please do `cupidfetch 2> /dev/null`.
+If it can't create a log at `.../cupidfetch/log.txt`, it will output to the stderr. If you want to ignore it, please do `cupidfetch 2> /dev/null`.
 
 ## Requirements
 
@@ -118,9 +117,9 @@ IF there's no log at `.../cupidfetch/log.txt`, it will output to the stderr. If 
 
 Welcome everyone! All skill levels can contribute:
 
+* Join our Discord!: [Discord](https://discord.gg/698GBkg2KR)
 * Beginners: Great project to learn and get involved
 * Experienced developers: Share your knowledge and help improve
-* Join our Discord!: [Discord](https://discord.gg/698GBkg2KR)
 
 ## To-do list
 
@@ -129,13 +128,15 @@ Welcome everyone! All skill levels can contribute:
 * **[ ]** Add colors at the bottom
 * **[ ]** Fix alignment with text for proper ASCII art display
 * **[ ]** Add unicode icons for each info area (ex. terminal icon for what shell you are using)
-* **[ ]** Create and use a function that will get the geometry for each terminal so we aren't hard coding values
+* **[ ]** Create and use a function that will get the geometry for each terminal so we aren't hard coding values (and make print.c choose the values by itself)
 * **[X]** Implement a solid function to detect a large amount of distros
 * **[X]** Add memory info
 * **[X]** Add storage info
 * **[X]** Fix terminal info, DE, and WM info and include more support
-* **[ ]** Make install 
+* **[ ]** Make install
+* **[ ]** Arch AUR
 * **[X]** Config system using INI files with [inih C parser](https://github.com/benhoyt/inih) (done, pushing soon)
+* **[ ]** Individual module config (the section is the module being configured)
 
 ![Intended UI](images/ui.png)
 
