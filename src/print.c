@@ -2,6 +2,7 @@
 
 int get_terminal_width() {
     struct winsize w;
+    // FIXME: no error handling
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
     return w.ws_col;
 }
@@ -25,12 +26,12 @@ void print_info(const char *key, const char *format, int align_key, int align_va
 void print_cat(const char* distro) {
     if (strcmp(distro, "Ubuntu") == 0 || strcmp(distro, "Debian") == 0 ||
         strcmp(distro, "Arch") == 0 || strcmp(distro, "CentOS") == 0) {
-        printf(" /\\_/\\\n");
-        printf("( o.o )\n");
-        printf(" > ^ <  cupidfetch");
+        printf(" /\\_/\\\n"
+	       "( o.o )\n"
+               " > ^ <  cupidfetch");
     } else {
-        printf(" /\\_/\\\n");
-        printf("( x.x )\n");
-        printf(" > ^ <  cupidfetch");
+        printf(" /\\_/\\\n"
+               "( x.x )\n"
+               " > ^ <  cupidfetch");
     }
 }
