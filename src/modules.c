@@ -34,8 +34,11 @@ void get_uptime() {
     }
 
     double uptime;
-    if (fscanf(uptime_file, "%lf", &uptime) != 1) return; // TODO: log
-
+    if (fscanf(uptime_file, "%lf", &uptime) != 1) {
+        cupid_log(LogType_ERROR, "couldn't read uptime from /proc/uptime");
+        fclose(uptime_file);
+        return;
+    }
     fclose(uptime_file);
 
     int days = (int)uptime / (60 * 60 * 24);
@@ -66,7 +69,10 @@ void get_package_count() {
 
     // Run the package command and display the result
     FILE* fp = popen(package_command, "r");
-    if (fp == NULL) return; // TODO: log
+    if (fp == NULL) {
+        cupid_log(LogType_ERROR, "popen failed for package command");
+        return;
+    }
 
     char output[100];
     if (fgets(output, sizeof(output), fp) != NULL) {
@@ -82,11 +88,17 @@ void get_shell() {
     uid_t uid = geteuid();
 
     struct passwd *pw = getpwuid(uid);
-    if (pw == NULL) return; // TODO: log
+    if (pw == NULL) {
+        cupid_log(LogType_ERROR, "getpwuid failed to retrieve user password entry");
+        return;
+    }
 
     // Extract the shell from the password file entry
     const char *shell = pw->pw_shell;
-    if (shell == NULL) return; // TODO: log
+    if (shell == NULL) {
+        cupid_log(LogType_ERROR, "getpwuid failed to retrieve user shell information");
+        return;
+    }
 
     // Extract the base name of the shell
     const char *baseName = strrchr(shell, '/');
@@ -96,10 +108,16 @@ void get_shell() {
 }
 
 void get_terminal() {
-    if (!isatty(STDOUT_FILENO)) return; // TODO: log
+    if (!isatty(STDOUT_FILENO)) {
+        cupid_log(LogType_ERROR, "Not running in a terminal");
+        return;
+    }
 
     const char *term_program = getenv("TERM");
-    if (term_program == NULL) return; // TODO: log
+    if (term_program == NULL) {
+        cupid_log(LogType_ERROR, "Failed to retrieve terminal program information");
+        return;
+    }
 
     print_info("Terminal", "%s", 20, 30, term_program);
 }
@@ -198,7 +216,7 @@ void get_desktop_environment() {
 
     dir = opendir("/proc");
     if (dir == NULL) {
- // TODO: log
+        cupid_log(LogType_ERROR, "Failed to open /proc directory");
         return;
     }
 
@@ -254,7 +272,8 @@ void get_desktop_environment() {
     closedir(dir);
 
     // This can just be removed ig idk
-    if (entry == NULL) { // TODO: log
+    if (entry == NULL) {
+        cupid_log(LogType_INFO, "Failed to read /proc directory");
         //print_info("DE", "Unknown", 20, 30);
     }
 }
@@ -262,8 +281,10 @@ void get_desktop_environment() {
 // haha got ur ip
 void get_local_ip() {
     struct ifaddrs *ifaddr, *ifa;
-    if (getifaddrs(&ifaddr) == -1) return;
-
+    if (getifaddrs(&ifaddr) == -1) {
+        cupid_log(LogType_ERROR, "getifaddrs failed");
+        return;
+    }
     for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
         if (ifa->ifa_addr != NULL && ifa->ifa_addr->sa_family == AF_INET) {
             struct sockaddr_in *addr = (struct sockaddr_in *)ifa->ifa_addr;
@@ -276,7 +297,6 @@ void get_local_ip() {
 	    }
         }
     }
- // TODO: log
     freeifaddrs(ifaddr);
 }
 
@@ -338,7 +358,10 @@ void get_available_memory() {
 
     fclose(meminfo);
 
-    if (mem_total == -1) return; // TODO: log
+    if (meminfo == NULL) {
+        cupid_log(LogType_ERROR, "Failed to open /proc/meminfo");
+        return;
+    }
 
     if (mem_avail != -1) {
         mem_used = mem_total - mem_avail;
@@ -355,8 +378,10 @@ void get_available_memory() {
 
 void get_available_storage() {
     FILE* mount_file = fopen("/proc/mounts", "r");
-    if (mount_file == NULL) return;
-
+    if (mount_file == NULL) {
+        cupid_log(LogType_ERROR, "couldn't open /proc/mounts");
+        return;
+    }
 
     bool first = 1;
     char mount_point[256];
