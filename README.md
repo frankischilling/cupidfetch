@@ -123,20 +123,19 @@ Welcome everyone! All skill levels can contribute:
 
 ## To-do list
 
-- [X] Clean code and info display overall
-- [ ] Add ASCII art for each distro with custom kitty art
-- [ ] Add colors at the bottom
+- [ ] Add ASCII art
+- [ ] Add colors/user theming
 - [ ] Fix alignment with text for proper ASCII art display
-- [ ] Add unicode icons for each info area (ex. terminal icon for what shell you are using)
-- [ ] Create and use a function that will get the geometry for each terminal so we aren't hard coding values (and make print.c choose the values by itself)
+- [ ] Add unicode icons
+- [ ] Make install
+- [ ] Arch AUR
+- [ ] Individual module config (the section is the module being configured)
 - [X] Implement a solid function to detect a large amount of distros
 - [X] Add memory info
 - [X] Add storage info
 - [X] Fix terminal info, DE, and WM info and include more support
-- [ ] Make install
-- [ ] Arch AUR
-- [X] Config system using INI files with [inih C parser](https://github.com/benhoyt/inih) (done, pushing soon)
-- [ ] Individual module config (the section is the module being configured)
+- [X] Config system
+- [X] Clean code and info display overall
 
 ![Intended UI](images/ui.png)
 
