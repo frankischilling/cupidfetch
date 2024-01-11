@@ -56,4 +56,3 @@ DISTRO("solus"    , "Solus"       , "eopkg list-installed | wc -l")
 
 /* please don't remove this */
 #undef DISTRO
-

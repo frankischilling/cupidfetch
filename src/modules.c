@@ -201,7 +201,6 @@ void get_window_manager() {
 */
 
 void get_desktop_environment() {
-
     const char* xdgDesktop = getenv("XDG_CURRENT_DESKTOP");
     if (xdgDesktop != NULL && strlen(xdgDesktop) > 0) {
         print_info("DE", xdgDesktop, 20, 30);
@@ -374,6 +373,66 @@ void get_available_memory() {
         mem_total * 1024 / g_userConfig.memory_unit_size,
         g_userConfig.memory_unit
     );
+}
+
+
+void get_cpu() {
+    FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
+
+    if (cpuinfo == NULL) {
+        cupid_log(LogType_ERROR, "Failed to open /proc/cpuinfo");
+        return;
+    }
+
+    char line[100];
+    char model_name[100];
+    int num_cores = 0;
+    int num_threads = 0;
+
+    while (fgets(line, sizeof(line), cpuinfo)) {
+        char* token = strtok(line, ":");
+        if (token != NULL) {
+            if (strstr(token, "model name") != NULL) {
+                // Extract CPU model name
+                char* model_value = strtok(NULL, ":");
+                if (model_value != NULL) {
+                    snprintf(model_name, sizeof(model_name), "%s", model_value);
+                    // Remove leading and trailing whitespaces
+                    size_t len = strlen(model_name);
+                    if (len > 0 && model_name[len - 1] == '\n') {
+                        model_name[len - 1] = '\0';  // Remove newline character
+                    }
+
+                    // You can keep this block to remove leading whitespaces
+                    char* start = model_name;
+                    while (*start && (*start == ' ' || *start == '\t')) {
+                        start++;
+                    }
+                    memmove(model_name, start, strlen(start) + 1);
+                }
+            } else if (strstr(token, "cpu cores") != NULL) {
+                // Extract number of CPU cores
+                char* cores_str = strtok(NULL, ":");
+                if (cores_str != NULL) {
+                    num_cores = atoi(cores_str);
+                }
+            } else if (strstr(token, "siblings") != NULL) {
+                // Extract number of threads (siblings)
+                char* threads_str = strtok(NULL, ":");
+                if (threads_str != NULL) {
+                    num_threads = atoi(threads_str);
+                }
+            }
+        }
+    }
+
+    fclose(cpuinfo);
+
+    if (strlen(model_name) > 0 && num_cores > 0 && num_threads > 0) {
+        print_info("CPU Info", "Model: %s, Cores: %d, Threads: %d", 20, 30, model_name, num_cores, num_threads);
+    } else {
+        cupid_log(LogType_ERROR, "Failed to retrieve CPU information");
+    }
 }
 
 void get_available_storage() {

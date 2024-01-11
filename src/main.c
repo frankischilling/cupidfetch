@@ -2,8 +2,6 @@
 
 FILE *g_log = NULL;
 
-
-
 const char* detect_linux_distro() {
     FILE* os_release = fopen("/etc/os-release", "r");
     if (os_release == NULL) {
@@ -13,7 +11,6 @@ const char* detect_linux_distro() {
 
     char line[256];
     const char* distro = "Unknown";
-
 
     while (fgets(line, sizeof(line), os_release)) {
         if (strstr(line, "ID=") != NULL) {
@@ -40,7 +37,6 @@ const char* detect_linux_distro() {
 
 	    if (0) {}
 	    #include "../data/distros.def"
-
 
             if (!supported) {
                 printf("Warning: Unknown distribution '%s'\n", distroId);
@@ -93,7 +89,6 @@ int main() {
 
     init_g_config();
     g_log = NULL;
-
 
     if (!isatty(STDIN_FILENO))
         parse_result = ini_parse_file(stdin, cupid_ini_handler, &g_userConfig);
