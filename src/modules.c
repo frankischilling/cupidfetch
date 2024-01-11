@@ -4,27 +4,26 @@
 void get_hostname() {
     char hostname[256];
     if (gethostname(hostname, sizeof(hostname)) != 0)
-    	cupid_log(LogType_CRITICAL, "couldn't get hostname");
-
-    print_info("Hostname", hostname, 20, 30);
+    	cupid_log(LogType_ERROR, "couldn't get hostname");
+    else
+	print_info("Hostname", hostname, 20, 30);
 }
 
 void get_username() {
     char* username = getlogin();
-    if (username != NULL) {
+    if (username != NULL)
         print_info("Username", username, 20, 30);
-    }
+    else
+	cupid_log(LogType_ERROR, "couldn't get username");
 }
 
 void get_linux_kernel() {
     struct utsname uname_data;
 
-    if (uname(&uname_data) != 0) {
+    if (uname(&uname_data) != 0)
     	cupid_log(LogType_ERROR, "couldn't get uname data");
-        return;
-    }
-
-    print_info("Linux Kernel", uname_data.release, 20, 30);
+    else
+	print_info("Linux Kernel", uname_data.release, 20, 30);
 }
 
 void get_uptime() {
@@ -48,63 +47,20 @@ void get_uptime() {
 }
 
 void get_distro() {
-    // TODO: distro can be a global
     const char *distro = detect_linux_distro();
     print_info("Distro", distro, 20, 30);
 }
-
-struct DistroPackageInfo {
-    const char* distro;
-    const char* package_command;
-};
 
 void get_package_count() {
     const char* package_command = NULL;
     const char* distro = detect_linux_distro();
 
-    // List of supported distros and their package commands
-    struct DistroPackageInfo supported_distros[] = {
-            {"Ubuntu", "dpkg -l | tail -n+6 | wc -l"},
-            {"Debian", "dpkg -l | tail -n+6 | wc -l"},
-            {"elementary OS", "dpkg -l | tail -n+6 | wc -l"},
-            {"Zorin OS", "dpkg -l | tail -n+6 | wc -l"},
-            {"Pop!_OS", "dpkg -l | tail -n+6 | wc -l"},
-            {"MX Linux", "dpkg -l | tail -n+6 | wc -l"},
-            {"Kali Linux", "dpkg -l | tail -n+6 | wc -l"},
-            {"Parrot OS", "dpkg -l | tail -n+6 | wc -l"},
-            {"Raspbian", "dpkg -l | tail -n+6 | wc -l"},
-            {"Raspberry Pi OS", "dpkg -l | tail -n+6 | wc -l"},
-            {"Arch Linux", "pacman -Q | wc -l"},
-            {"Manjaro", "pacman -Q | wc -l"},
-            {"Artix Linux", "pacman -Q | wc -l"},
-            {"BlueStar", "pacman -Q | wc -l"},
-            {"EndeavourOS", "pacman -Q | wc -l"},
-            {"CentOS", "rpm -qa | wc -l"},
-            {"Fedora", "rpm -qa | wc -l"},
-            {"openSUSE", "rpm -qa | wc -l"},
-            {"Mageia", "rpm -qa | wc -l"},
-            {"AlmaLinux", "rpm -qa | wc -l"},
-            {"Rocky Linux", "rpm -qa | wc -l"},
-            {"Amazon Linux", "rpm -qa | wc -l"},
-            {"Gentoo", "equery -q list '*' | wc -l"},
-            {"Alpine Linux", "apk info | wc -l"},
-            {"Void Linux", "xbps-query -l | wc -l"},
-            {"Slackware", "ls /var/log/packages/ | wc -l"},
-            {"Solus", "eopkg list-installed | wc -l"},
-            {"NixOS", "nix-env --list-generations | wc -l"},
-            {"Antergos", "pacman -Q | wc -l"},
-            {"Linux Mint", "dpkg -l | tail -n+6 | wc -l"},
-            {"Peppermint OS", "dpkg -l | tail -n+6 | wc -l"}
-            // Add more distros as needed
-    };
 
-    // Find the package command for the provided distro
-    for (int i = 0; i < sizeof(supported_distros) / sizeof(supported_distros[0]); i++) {
-        if (strcmp(distro, supported_distros[i].distro) == 0) {
-            package_command = supported_distros[i].package_command;
-            break;
-        }
-    }
+    #define DISTRO(shortname, longname, pkgcmd) else if(strcmp(distro, longname) == 0) {\
+    	package_command = pkgcmd;}
+
+    if (0) {}
+    #include "../data/distros.def"
 
     if (package_command == NULL) return;
 

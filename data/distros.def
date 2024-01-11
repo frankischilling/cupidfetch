@@ -1,0 +1,59 @@
+/*
+ * Supported distributions
+ * Feel free to add others
+ *
+ * TODO: make code work when the third argument is set to NULL
+ */
+
+
+/* dpkg */
+DISTRO("ubuntu"    , "Ubuntu"         , "dpkg -l | tail -n+6 | wc -l")
+DISTRO("debian"    , "Debian"         , "dpkg -l | tail -n+6 | wc -l")
+DISTRO("elementary", "elementary OS"  , "dpkg -l | tail -n+6 | wc -l")
+DISTRO("zorin"     , "Zorin OS"       , "dpkg -l | tail -n+6 | wc -l")
+DISTRO("pop"       , "Pop!_OS"        , "dpkg -l | tail -n+6 | wc -l")
+DISTRO("mx"        , "MX Linux"       , "dpkg -l | tail -n+6 | wc -l")
+DISTRO("kali"      , "Kali Linux"     , "dpkg -l | tail -n+6 | wc -l")
+DISTRO("mint"      , "Linux Mint"     , "dpkg -l | tail -n+6 | wc -l")
+DISTRO("peppermint", "Peppermint OS"  , "dpkg -l | tail -n+6 | wc -l")
+// DISTRO("Parrot OS"      , "dpkg -l | tail -n+6 | wc -l")
+// DISTRO("Raspbian"       , "dpkg -l | tail -n+6 | wc -l")
+// DISTRO("Raspberry Pi OS", "dpkg -l | tail -n+6 | wc -l")
+
+/* pacman */
+DISTRO("arch"       , "Arch Linux" , "pacman -Q | wc -l")
+DISTRO("manjaro"    , "Manjaro"    , "pacman -Q | wc -l")
+DISTRO("artix"      , "Artix Linux", "pacman -Q | wc -l")
+DISTRO("endeavouros", "EndeavourOS", "pacman -Q | wc -l")
+DISTRO("antergos"   , "Antergos"   , "pacman -Q | wc -l")
+// DISTRO("BlueStar"   , "pacman -Q | wc -l"},
+
+/* rpm */
+DISTRO("centos"  , "CentOS"      , "rpm -qa | wc -l")
+DISTRO("fedora"  , "Fedora"      , "rpm -qa | wc -l")
+DISTRO("opensuse", "openSUSE"    , "rpm -qa | wc -l")
+DISTRO("mageia"  , "Mageia"      , "rpm -qa | wc -l")
+DISTRO("alma"    , "AlmaLinux"   , "rpm -qa | wc -l")
+// DISTRO("Rocky Linux" , "rpm -qa | wc -l"},
+// DISTRO("Amazon Linux", "rpm -qa | wc -l"},
+
+/* others */
+
+DISTRO("gentoo"   , "Gentoo"      , "equery -q list '*' | wc -l")
+
+DISTRO("alpine"   , "Alpine Linux", "apk info | wc -l")
+
+DISTRO("void"     , "Void Linux"  , "xbps-query -l | wc -l")
+
+DISTRO("slackware", "Slackware"   , "ls /var/log/packages/ | wc -l")
+
+DISTRO("solus"    , "Solus"       , "eopkg list-installed | wc -l")
+
+// DISTRO(?????, "NixOS", "nix-env --list-generations | wc -l")
+
+
+// {"redhat", "Red Hat"},
+
+/* please don't remove this */
+#undef DISTRO
+

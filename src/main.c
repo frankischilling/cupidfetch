@@ -3,11 +3,6 @@
 FILE *g_log = NULL;
 
 
-// Define a structure to hold distro information
-struct DistroInfo {
-    const char* shortname;
-    const char* longname;
-};
 
 const char* detect_linux_distro() {
     FILE* os_release = fopen("/etc/os-release", "r");
@@ -19,36 +14,6 @@ const char* detect_linux_distro() {
     char line[256];
     const char* distro = "Unknown";
 
-    // Define an array of DistroInfo structs for supported distros
-    // TODO: get this from the config
-    const struct DistroInfo supported_distros[] = {
-            {"arch", "Arch Linux"},
-            {"debian", "Debian"},
-            {"ubuntu", "Ubuntu"},
-            {"centos", "CentOS"},
-            {"fedora", "Fedora"},
-            {"redhat", "Red Hat"},
-            {"opensuse", "openSUSE"},
-            {"gentoo", "Gentoo"},
-            {"alpine", "Alpine Linux"},
-            {"slackware", "Slackware"},
-            {"manjaro", "Manjaro"},
-            {"elementary", "elementary OS"},
-            {"mint", "Linux Mint"},
-            {"kali", "Kali Linux"},
-            {"zorin", "Zorin OS"},
-            {"void", "Void Linux"},
-            {"alma", "AlmaLinux"},
-            {"artix", "Artix Linux"},
-            {"endeavouros", "EndeavourOS"},
-            {"mx", "MX Linux"},
-            {"peppermint", "Peppermint OS"},
-            {"pop", "Pop!_OS"},
-            {"solus", "Solus"},
-            {"antergos", "Antergos"},
-            {"mageia", "Mageia"}
-            // Add more distros as needed
-    };
 
     while (fgets(line, sizeof(line), os_release)) {
         if (strstr(line, "ID=") != NULL) {
@@ -66,14 +31,16 @@ const char* detect_linux_distro() {
             }
 
             // Check if the distroId is in the list of supported distros
-            int supported = 0;
-            for (size_t i = 0; i < sizeof(supported_distros) / sizeof(supported_distros[0]); i++) {
-                if (strstr(distroId, supported_distros[i].shortname) != NULL) {
-                    supported = 1;
-                    distro = supported_distros[i].longname;
-                    break;
-                }
-            }
+
+	    int supported = 0;
+
+	    #define DISTRO(shortname, longname, pkgcmd) else if (strstr(distroId, (shortname)) != NULL){\
+	    	supported = 1;\
+		distro = (longname);}
+
+	    if (0) {}
+	    #include "../data/distros.def"
+
 
             if (!supported) {
                 printf("Warning: Unknown distribution '%s'\n", distroId);
