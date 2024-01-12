@@ -6,26 +6,21 @@ struct {
     char *s;
     void (*m)(void);
 } string_to_module[] = {
-    {"host_name", get_hostname},
     {"hostname", get_hostname},
     {"username", get_username},
     {"distro", get_distro},
     {"linux_kernel", get_linux_kernel},
+    {"kernel", get_linux_kernel},
     {"uptime", get_uptime},
-    {"package_count", get_package_count},
     {"pkg", get_package_count},
     {"shell", get_shell},
-    {"desktop_environment", get_desktop_environment},
     {"de", get_desktop_environment},
     /* TODO: window manager module reactivation */
     // {"window_manager", 
-    {"local_ip", get_local_ip},
     {"ip", get_local_ip},
-    {"available_memory", get_available_memory},
     {"memory", get_available_memory},
-    {"cpu", get_cpu},
-    {"available_storage", get_available_storage},
     {"storage", get_available_storage}
+    {"cpu", get_cpu},
 };
 
 void init_g_config() {
