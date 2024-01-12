@@ -53,14 +53,18 @@ const char* detect_linux_distro() {
 
 void display_fetch() {
     // Fetch system information
-    const char* detectedDistro = detect_linux_distro();
     char hostname[256];
-    char* username = getlogin();
+    const char *detectedDistro = detect_linux_distro();
+    char *username = getlogin();
 
-    // Check for errors getting host name
+    if (username == NULL) {
+	cupid_log(LogType_ERROR, "couldn't get username");
+        username = "";
+    }
+
     if (gethostname(hostname, sizeof(hostname)) != 0) {
-        fprintf(stderr, "Error getting host name\n");
-        exit(EXIT_FAILURE);
+    	cupid_log(LogType_ERROR, "couldn't get hostname");
+	hostname[0] = '\0';
     }
 
     // Calculate alignment spaces
