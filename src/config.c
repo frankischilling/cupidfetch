@@ -74,20 +74,19 @@ int cupid_ini_handler(void* user, const char* section, const char* name, const c
 	} else {
 	    return 0;
 	}
-    } else if (strcmp(section, "Config") == 0) {
-        if (strcmp(name, "memory_unit") == 0) {
+    } else if (strcmp(section, "memory") == 0) {
+        if (strcmp(name, "unit-str") == 0) {
 	    if (value) strncpy(config->memory_unit, value, MEMORY_UNIT_LEN);
-        } else if (strcmp(name, "memory_unit_size") == 0) {
+        } else if (strcmp(name, "unit-size") == 0) {
 	    config->memory_unit_size = (value != NULL) ? atol(value) : 1024 * 1024;
-        } else if (strcmp(name, "storage_unit") == 0) {
+	} else return 0;
+    } else if (strcmp(section, "storage") == 0) {
+        if (strcmp(name, "unit-str") == 0) {
 	    if (value) strncpy(config->storage_unit, value, MEMORY_UNIT_LEN);
-        } else if (strcmp(name, "storage_unit_size") == 0) {
+        } else if (strcmp(name, "unit-size") == 0) {
 	    config->storage_unit_size = (value != NULL) ? atol(value) : 1024 * 1024;
-        } else {
-            return 0;  /* unknown section/name, error */
-        }
-
-    }
+        } else return 0;
+    } else return 0;
 
     return 1;
 }
