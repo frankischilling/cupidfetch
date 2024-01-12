@@ -37,9 +37,9 @@ void init_g_config() {
 		   , NULL
 		   },
         .memory_unit = "MB",
-        .memory_unit_size = 1024 * 1024,
+        .memory_unit_size = 1000000,
         .storage_unit = "GB",
-        .storage_unit_size = 1024 * 1024 * 1024,
+        .storage_unit_size = 1000000000,
     };
     g_userConfig = cfg_;
 }
