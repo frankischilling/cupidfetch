@@ -103,6 +103,10 @@ You can use the `install-config.sh` script to create cupidfetch the config. You 
 
 The configuration file for `cupidfetch` is located at `${XDG_CONFIG_HOME or $HOME/.config}/cupidfetch/cupidfetch.ini`. This file allows you to customize the displayed information by toggling options on or off. An example config is at the `data` directory of this repository. It includes some comments that may help you.
 
+**Storage units**
+
+The config lets you change what memory unit you prefer to use for storage and memory information. The storage unit size is measured in bytes, so if you wanted to use MB, it would be `1000000` bytes but if you wanted to use GB, it would be `1000000000` bytes.
+
 ## Log File
 
 If it can't create a log at `.../cupidfetch/log.txt`, it will output to the stderr. If you want to ignore it, please do `cupidfetch 2> /dev/null`.
