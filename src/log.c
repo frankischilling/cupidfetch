@@ -8,7 +8,7 @@ void cupid_log(LogType ltp, const char *format, ...) {
 
     fprintf(g_log, "%s: <", log_types[ltp]);
     vfprintf(g_log, format, args);
-    fprintf(g_log, ">\n");
+    fprintf(g_log, "> errno=<%s>\n", strerror(errno));
 
     va_end(args);
 
