@@ -19,7 +19,7 @@ struct {
     // {"window_manager", 
     {"ip", get_local_ip},
     {"memory", get_available_memory},
-    {"storage", get_available_storage}
+    {"storage", get_available_storage},
     {"cpu", get_cpu},
 };
 
