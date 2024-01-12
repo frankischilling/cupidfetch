@@ -28,7 +28,6 @@
 #define LINUX_PROC_LINE_SZ 128
 #define MEMORY_UNIT_LEN 128
 
-
 struct CupidConfig {
     void (*modules[MAX_NUM_MODULES + 1])(void);
     char memory_unit[MEMORY_UNIT_LEN];
@@ -49,7 +48,6 @@ int get_terminal_width();
 void print_info(const char *key, const char *format, int align_key, int align_value, ...);
 void print_cat(const char* distro);
 
-
 // modules.c
 void get_hostname();
 void get_username();
@@ -63,9 +61,9 @@ void get_desktop_environment();
 /* void get_window_manager(); */
 void get_local_ip();
 void get_available_memory();
+void get_cpu();
 void get_available_storage();
 const char* get_home_directory();
-
 
 // config.c
 extern struct CupidConfig g_userConfig;
@@ -80,6 +78,5 @@ void cupid_log(LogType ltp, const char *format, ...);
 extern FILE *g_log;
 const char* detect_linux_distro();
 void epitaph();
-
 
 #endif

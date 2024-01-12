@@ -2,7 +2,6 @@
 
 struct CupidConfig g_userConfig;
 
-
 struct {
     char *s;
     void (*m)(void);
@@ -24,32 +23,30 @@ struct {
     {"ip", get_local_ip},
     {"available_memory", get_available_memory},
     {"memory", get_available_memory},
+    {"cpu", get_cpu},
     {"available_storage", get_available_storage},
     {"storage", get_available_storage}
 };
-
 
 void init_g_config() {
     struct CupidConfig cfg_ = {
 	.modules = { get_hostname, get_username, get_distro, get_linux_kernel
 	           , get_uptime, get_package_count, get_shell
-		   , get_desktop_environment, get_local_ip, get_available_memory
+		   , get_desktop_environment, get_local_ip, get_available_memory, get_cpu
 		   , get_available_storage
 		   , NULL
 		   },
-        .memory_unit = "MiB",
+        .memory_unit = "MB",
         .memory_unit_size = 1024 * 1024,
-        .storage_unit = "GiB",
+        .storage_unit = "GB",
         .storage_unit_size = 1024 * 1024 * 1024,
     };
     g_userConfig = cfg_;
 }
 
-
 // INI handler function
 int cupid_ini_handler(void* user, const char* section, const char* name, const char* value) {
     struct CupidConfig* config = (struct CupidConfig*)user;
-
 
     if (!section || section[0] == '\0') {
 	if (strcmp(name, "modules") == 0) {
@@ -77,7 +74,7 @@ int cupid_ini_handler(void* user, const char* section, const char* name, const c
 	} else {
 	    return 0;
 	}
-    } else if (strcmp(section, "DisplayOptions") == 0) {
+    } else if (strcmp(section, "Config") == 0) {
         if (strcmp(name, "memory_unit") == 0) {
 	    if (value) strncpy(config->memory_unit, value, MEMORY_UNIT_LEN);
         } else if (strcmp(name, "memory_unit_size") == 0) {
