@@ -150,6 +150,8 @@ DISTRO("cupidOS"    , "cupidOS"         , "dpkg -l | tail -n+6 | wc -l")
 - [ ] Make install
 - [ ] Arch AUR
 - [ ] Individual module config (the section is the module being configured)
+- [ ] Implement WM & DE functions that arent hard-coded
+- [ ] Minimum terminal size (like how btop works)
 - [X] Implement a solid function to detect a large amount of distros
 - [X] Add memory info
 - [X] Add storage info
