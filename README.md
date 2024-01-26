@@ -146,7 +146,7 @@ DISTRO("cupidOS"    , "cupidOS"         , "dpkg -l | tail -n+6 | wc -l")
 - [ ] Add ASCII art
 - [ ] Add colors/user theming
 - [ ] Fix alignment with text for proper ASCII art display
-- [ ] Add unicode icons
+- [ ] Add unicode icons (nerd fonts?)
 - [ ] Make install
 - [ ] Arch AUR
 - [ ] Individual module config (the section is the module being configured)
