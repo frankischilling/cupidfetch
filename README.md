@@ -130,15 +130,14 @@ Welcome everyone! All skill levels can contribute:
 To add other Linux distros to be supported you can do so by adding them to the `data/distros.def` file. Here is an example of the dsitros.def file.
 
 ```
-/* dpkg */
-DISTRO("ubuntu"    , "Ubuntu"         , "dpkg -l | tail -n+6 | wc -l")
+DISTRO("ubuntu", "Ubuntu", "dpkg -l | tail -n+6 | wc -l")
 ```
 
 Let's say you wanted to add a new distro that uses dpkg called cupidOS; you could edit the distros.def like this.
 
 ```
-DISTRO("ubuntu"    , "Ubuntu"         , "dpkg -l | tail -n+6 | wc -l")
-DISTRO("cupidOS"    , "cupidOS"         , "dpkg -l | tail -n+6 | wc -l")
+DISTRO("ubuntu" , "Ubuntu" , "dpkg -l | tail -n+6 | wc -l")
+DISTRO("cupidOS", "cupidOS", "dpkg -l | tail -n+6 | wc -l")
 ```
 
 ## To-do list
