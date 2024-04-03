@@ -2,10 +2,11 @@
 
 struct CupidConfig g_userConfig;
 
-struct {
+struct module {
     char *s;
-    void (*m)(void);
-} string_to_module[] = {
+    void (*m)();
+};
+struct module string_to_module[] = {
     {"hostname", get_hostname},
     {"username", get_username},
     {"distro", get_distro},
@@ -13,6 +14,7 @@ struct {
     {"kernel", get_linux_kernel},
     {"uptime", get_uptime},
     {"pkg", get_package_count},
+    {"term", get_terminal},
     {"shell", get_shell},
     {"de", get_desktop_environment},
     /* TODO: window manager module reactivation */
@@ -26,7 +28,7 @@ struct {
 void init_g_config() {
     struct CupidConfig cfg_ = {
 	.modules = { get_hostname, get_username, get_distro, get_linux_kernel
-	           , get_uptime, get_package_count, get_shell
+	           , get_uptime, get_package_count, get_terminal, get_shell
 		   , get_desktop_environment, get_local_ip, get_available_memory, get_cpu
 		   , get_available_storage
 		   , NULL
