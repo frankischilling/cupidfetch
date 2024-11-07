@@ -142,7 +142,7 @@ DISTRO("cupidOS", "cupidOS", "dpkg -l | tail -n+6 | wc -l")
 
 ## To-do list
 
-- [ ] Add ASCII art
+- [ ] Add ASCII art for each distro, and funny text along side each distro for example the arch kitten could be saying "I use arch btw" 
 - [ ] Add colors/user theming
 - [ ] Fix alignment with text for proper ASCII art display
 - [ ] Add unicode icons (nerd fonts?)
@@ -150,7 +150,7 @@ DISTRO("cupidOS", "cupidOS", "dpkg -l | tail -n+6 | wc -l")
 - [ ] Arch AUR
 - [ ] Individual module config (the section is the module being configured)
 - [ ] Implement WM & DE functions that arent hard-coded
-- [ ] Minimum terminal size (like how btop works)
+- [ ] Minimum terminal size - implement sig winch handling
 - [X] Implement a solid function to detect a large amount of distros
 - [X] Add memory info
 - [X] Add storage info
