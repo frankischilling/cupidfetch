@@ -143,7 +143,8 @@ DISTRO("cupidOS", "cupidOS", "dpkg -l | tail -n+6 | wc -l")
 
 ## To-do list
 
-- [ ] Add ASCII art for each distro, and funny text along side each distro for example the arch kitten could be saying "I use arch btw" 
+- [ ] Add ASCII art for each distro, and funny text along side each distro for example the arch kitten could be saying "I use arch btw"
+- [ ] Auto check for distro if found in config cont, if not then auto add to distros.def  
 - [ ] Add colors/user theming
 - [ ] Fix alignment with text for proper ASCII art display
 - [ ] Add unicode icons (nerd fonts?)
