@@ -27,6 +27,7 @@ cupidfetch is a system information retrieval tool written in C for Linux systems
 * Desktop environment
 * Username
 * Memory
+* Signal Handling for Window Resize, Automatically updates display with terminal resizing (`SIGWINCH`)
 * and others
 
 **⬜ Enhance visual representation (soon):**
@@ -150,7 +151,7 @@ DISTRO("cupidOS", "cupidOS", "dpkg -l | tail -n+6 | wc -l")
 - [ ] Arch AUR
 - [ ] Individual module config (the section is the module being configured)
 - [ ] Implement WM & DE functions that arent hard-coded
-- [ ] Minimum terminal size - implement sig winch handling
+- [X] Signal Handling for Window Resize: Automatically updates display with terminal resizing (`SIGWINCH`).
 - [X] Implement a solid function to detect a large amount of distros
 - [X] Add memory info
 - [X] Add storage info
