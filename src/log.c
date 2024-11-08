@@ -1,3 +1,5 @@
+// File: log.c
+// -----------------------
 #include "cupidfetch.h"
 
 const char *log_types[] = {"INFO", "WARNING", "ERROR", "CRITICAL"};

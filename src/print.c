@@ -1,3 +1,5 @@
+// File: print.c
+// -----------------------
 #include "cupidfetch.h"
 
 int get_terminal_width() {

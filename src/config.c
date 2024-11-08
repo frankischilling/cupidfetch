@@ -1,3 +1,5 @@
+// File: config.c
+// -----------------------
 #include "cupidfetch.h"
 
 struct CupidConfig g_userConfig;
